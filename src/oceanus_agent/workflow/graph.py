@@ -1,8 +1,11 @@
 """LangGraph workflow definition for diagnosis."""
 
 import structlog
+from typing import Any, cast
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
+from langgraph.graph.state import CompiledStateGraph
+from langchain_core.runnables import RunnableConfig
 
 from oceanus_agent.config.settings import Settings
 from oceanus_agent.models.state import DiagnosisState, DiagnosisStatus
@@ -68,20 +71,16 @@ def handle_error(state: DiagnosisState) -> DiagnosisState:
     job_info = state.get("job_info")
     job_id = job_info.get("job_id") if job_info else "unknown"
 
-    logger.error(
-        "Workflow error",
-        job_id=job_id,
-        error=state.get("error")
-    )
+    logger.error("Workflow error", job_id=job_id, error=state.get("error"))
 
     return {
         **state,
         "status": DiagnosisStatus.FAILED,
-        "end_time": datetime.now().isoformat()
+        "end_time": datetime.now().isoformat(),
     }
 
 
-def build_diagnosis_workflow(settings: Settings) -> StateGraph:
+def build_diagnosis_workflow(settings: Settings) -> CompiledStateGraph:
     """Build the diagnosis workflow graph.
 
     Args:
@@ -97,18 +96,11 @@ def build_diagnosis_workflow(settings: Settings) -> StateGraph:
 
     # Initialize nodes
     collector = JobCollector(mysql_service)
-    retriever = KnowledgeRetriever(
-        milvus_service,
-        llm_service,
-        settings.knowledge
-    )
+    retriever = KnowledgeRetriever(milvus_service, llm_service, settings.knowledge)
     diagnoser = LLMDiagnoser(llm_service)
     storer = ResultStorer(mysql_service)
     accumulator = KnowledgeAccumulator(
-        mysql_service,
-        milvus_service,
-        llm_service,
-        settings.knowledge
+        mysql_service, milvus_service, llm_service, settings.knowledge
     )
 
     # Build workflow
@@ -128,11 +120,7 @@ def build_diagnosis_workflow(settings: Settings) -> StateGraph:
     workflow.add_conditional_edges(
         "collect",
         should_continue_after_collect,
-        {
-            "retrieve": "retrieve",
-            "handle_error": "handle_error",
-            END: END
-        }
+        {"retrieve": "retrieve", "handle_error": "handle_error", END: END},
     )
 
     workflow.add_edge("retrieve", "diagnose")
@@ -143,8 +131,8 @@ def build_diagnosis_workflow(settings: Settings) -> StateGraph:
         {
             "diagnose": "diagnose",  # Retry
             "store": "store",
-            "handle_error": "handle_error"
-        }
+            "handle_error": "handle_error",
+        },
     )
 
     workflow.add_edge("store", "accumulate")
@@ -187,13 +175,13 @@ class DiagnosisWorkflow:
             "start_time": datetime.now().isoformat(),
             "end_time": None,
             "error": None,
-            "retry_count": 0
+            "retry_count": 0,
         }
 
-        config = {"configurable": {"thread_id": thread_id}}
+        config = cast(RunnableConfig, {"configurable": {"thread_id": thread_id}})
         result = await self.app.ainvoke(initial_state, config)
 
-        return result
+        return cast(DiagnosisState, result)
 
     async def close(self) -> None:
         """Close all services."""

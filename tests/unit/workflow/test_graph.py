@@ -25,9 +25,7 @@ class TestShouldContinueAfterCollect:
 
         assert result == "handle_error"
 
-    def test_returns_end_when_no_job(
-        self, initial_state: DiagnosisState
-    ) -> None:
+    def test_returns_end_when_no_job(self, initial_state: DiagnosisState) -> None:
         """无待处理作业时应结束."""
         result = should_continue_after_collect(initial_state)
 
@@ -142,9 +140,7 @@ class TestShouldContinueAfterDiagnose:
 class TestHandleError:
     """测试错误处理函数."""
 
-    def test_sets_failed_status(
-        self, state_with_job: DiagnosisState
-    ) -> None:
+    def test_sets_failed_status(self, state_with_job: DiagnosisState) -> None:
         """错误处理应设置失败状态."""
         state = {**state_with_job, "error": "Test error"}
 
@@ -152,9 +148,7 @@ class TestHandleError:
 
         assert result["status"] == DiagnosisStatus.FAILED
 
-    def test_sets_end_time(
-        self, state_with_job: DiagnosisState
-    ) -> None:
+    def test_sets_end_time(self, state_with_job: DiagnosisState) -> None:
         """错误处理应设置结束时间."""
         state = {**state_with_job, "error": "Test error"}
 
@@ -164,9 +158,7 @@ class TestHandleError:
         # 验证是有效的 ISO 格式时间戳
         datetime.fromisoformat(result["end_time"])
 
-    def test_preserves_other_state_fields(
-        self, state_with_job: DiagnosisState
-    ) -> None:
+    def test_preserves_other_state_fields(self, state_with_job: DiagnosisState) -> None:
         """错误处理应保留其他状态字段."""
         state = {**state_with_job, "error": "Test error"}
 
@@ -175,9 +167,7 @@ class TestHandleError:
         assert result["job_info"] == state_with_job["job_info"]
         assert result["error"] == "Test error"
 
-    def test_handles_missing_job_info(
-        self, initial_state: DiagnosisState
-    ) -> None:
+    def test_handles_missing_job_info(self, initial_state: DiagnosisState) -> None:
         """应处理无作业信息的情况."""
         state = {**initial_state, "error": "Early error"}
 
@@ -186,9 +176,7 @@ class TestHandleError:
         assert result["status"] == DiagnosisStatus.FAILED
         assert result["job_info"] is None
 
-    def test_handles_none_job_id(
-        self, initial_state: DiagnosisState
-    ) -> None:
+    def test_handles_none_job_id(self, initial_state: DiagnosisState) -> None:
         """应处理 job_id 为 None 的情况."""
         state = {
             **initial_state,
@@ -226,9 +214,7 @@ class TestRoutingEdgeCases:
 
         assert result == "retrieve"
 
-    def test_diagnose_no_error_no_result(
-        self, state_with_job: DiagnosisState
-    ) -> None:
+    def test_diagnose_no_error_no_result(self, state_with_job: DiagnosisState) -> None:
         """无错误无结果时应路由到 store."""
         state = {**state_with_job, "diagnosis_result": None}
 
@@ -237,9 +223,7 @@ class TestRoutingEdgeCases:
         # 即使没有结果，只要没错误就继续
         assert result == "store"
 
-    def test_diagnose_default_retry_count(
-        self, state_with_job: DiagnosisState
-    ) -> None:
+    def test_diagnose_default_retry_count(self, state_with_job: DiagnosisState) -> None:
         """测试默认重试计数."""
         state = {
             **state_with_job,

@@ -6,6 +6,7 @@ from typing import TypedDict
 
 class DiagnosisStatus(str, Enum):
     """Status of a diagnosis task."""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -14,6 +15,7 @@ class DiagnosisStatus(str, Enum):
 
 class JobInfo(TypedDict):
     """Information about a Flink job exception."""
+
     exception_id: int
     job_id: str
     job_name: str | None
@@ -26,6 +28,7 @@ class JobInfo(TypedDict):
 
 class RetrievedCase(TypedDict):
     """A retrieved historical case from the knowledge base."""
+
     case_id: str
     error_type: str
     error_pattern: str
@@ -36,6 +39,7 @@ class RetrievedCase(TypedDict):
 
 class RetrievedDoc(TypedDict):
     """A retrieved document snippet from the knowledge base."""
+
     doc_id: str
     title: str
     content: str
@@ -46,12 +50,14 @@ class RetrievedDoc(TypedDict):
 
 class RetrievedContext(TypedDict):
     """Context retrieved from the knowledge base."""
+
     similar_cases: list[RetrievedCase]
     doc_snippets: list[RetrievedDoc]
 
 
 class DiagnosisResult(TypedDict):
     """Result of the LLM diagnosis."""
+
     root_cause: str
     detailed_analysis: str
     suggested_fix: str
@@ -66,6 +72,7 @@ class DiagnosisState(TypedDict):
     This is the main state object that flows through the LangGraph workflow.
     Each node can read and update fields in this state.
     """
+
     job_info: JobInfo | None
     status: DiagnosisStatus
     retrieved_context: RetrievedContext | None

@@ -15,9 +15,7 @@ class TestMySQLService:
     @pytest.fixture
     def mysql_service(self, mysql_settings: MagicMock) -> MySQLService:
         """Create MySQL service with mocked engine."""
-        with patch(
-            "oceanus_agent.services.mysql_service.create_async_engine"
-        ):
+        with patch("oceanus_agent.services.mysql_service.create_async_engine"):
             service = MySQLService(mysql_settings)
             return service
 

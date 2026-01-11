@@ -1,43 +1,88 @@
 # Oceanus Agent
 
-**Oceanus Agent** is an intelligent system designed to diagnose exceptions in Flink jobs using Large Language Models (LLMs). It automates the analysis of job failures (checkpoint failures, backpressure, etc.), suggests fixes, and accumulates knowledge over time.
+**Oceanus Agent** is an intelligent system designed to diagnose exceptions in Flink jobs using Large Language Models (LLMs). It automates the analysis of job failures, suggests fixes, and accumulates knowledge over time to improve future diagnoses.
 
 ## Project Overview
 
 - **Purpose**: Automate diagnosis and repair suggestions for Flink job exceptions.
-- **Core Logic**: Uses `LangGraph` to orchestrate a diagnosis workflow (`collect` -> `retrieve` -> `diagnose` -> `store` -> `accumulate`).
+- **Core Logic**: Uses `LangGraph` to orchestrate a cyclic diagnosis workflow with state management and persistence.
 - **Key Features**:
-    - **RAG-enhanced diagnosis**: Retrieves historical cases and documentation from Milvus.
-    - **Self-improving**: High-confidence diagnoses are added back to the knowledge base.
-    - **Structured output**: Provides root causes, fix steps, and priority levels.
+    - **RAG-enhanced Diagnosis**: Retrieves historical cases and documentation from Milvus to provide context-aware analysis.
+    - **Self-improving Knowledge Base**: High-confidence diagnoses are automatically vectorized and stored back into the system.
+    - **Robust Workflow**: Includes retry mechanisms, error handling, and state checkpointing.
+    - **Structured Output**: Delivers standardized diagnosis results including root cause, detailed analysis, and actionable fix steps.
 
 ## Technical Stack
 
 - **Language**: Python 3.11+
 - **Agent Framework**: LangGraph, LangSmith
-- **LLM**: OpenAI GPT-4o-mini (default)
-- **Vector DB**: Milvus
-- **Relational DB**: MySQL (Async/Sync)
+- **LLM Integration**: LangChain, OpenAI GPT-4o-mini
+- **Vector Database**: Milvus (pymilvus)
+- **Relational Database**: MySQL (Async via SQLAlchemy + aiomysql)
+- **API/Server**: FastAPI, Uvicorn
+- **Scheduling**: APScheduler
+- **Configuration**: Pydantic Settings
 - **Infrastructure**: Docker, Kubernetes
 
-## Key Files & Directories
+## Project Structure
 
-- `src/oceanus_agent/workflow/graph.py`: Defines the LangGraph workflow structure.
-- `src/oceanus_agent/workflow/nodes/`: Implementation of individual workflow steps (Collector, Retriever, Diagnoser, Storer, Accumulator).
-- `src/oceanus_agent/config/settings.py`: Configuration using Pydantic Settings.
-- `src/oceanus_agent/config/prompts.py`: LLM prompts for diagnosis.
-- `deploy/docker/docker-compose.yml`: Local development infrastructure (MySQL, Milvus, MinIO, Etcd).
-- `scripts/`: Database initialization scripts (`init_db.sql`, `init_milvus.py`).
+```text
+/home/debian/project/oceanus-agent/
+├── src/oceanus_agent/
+│   ├── config/             # Configuration and prompts
+│   │   ├── settings.py     # Pydantic settings definition
+│   │   └── prompts.py      # LLM system and user prompts
+│   ├── models/             # Pydantic data models
+│   │   ├── diagnosis.py    # Output structures
+│   │   ├── state.py        # Workflow state definitions
+│   │   └── knowledge.py    # Knowledge base entities
+│   ├── services/           # External system integrations
+│   │   ├── llm_service.py  # OpenAI wrapper for chat & embeddings
+│   │   ├── milvus_service.py # Vector DB operations
+│   │   └── mysql_service.py  # Relational DB operations
+│   └── workflow/           # LangGraph workflow definition
+│       ├── graph.py        # Main graph construction & routing
+│       └── nodes/          # Individual workflow steps
+│           ├── collector.py    # Fetches pending exceptions
+│           ├── retriever.py    # RAG context retrieval
+│           ├── diagnoser.py    # LLM analysis execution
+│           ├── storer.py       # Result persistence
+│           └── accumulator.py  # Knowledge base update
+├── deploy/                 # Deployment configurations
+├── scripts/                # Database initialization scripts
+└── tests/                  # Unit and integration tests
+```
 
-## Workflow
+## Workflow Architecture
 
-The diagnosis process follows this state graph:
-1.  **Collect**: Fetches job info and exception details from MySQL.
-2.  **Retrieve**: Searches Milvus for similar historical cases and relevant documentation.
-3.  **Diagnose**: Uses LLM to analyze the context and generate a diagnosis.
-    -   *Retry mechanism*: Retries up to 3 times on error.
-4.  **Store**: Saves the diagnosis result to MySQL.
-5.  **Accumulate**: If confidence is high (>0.8), vectorizes the result and stores it in Milvus for future RAG.
+The diagnosis process is modeled as a state graph with the following nodes:
+
+1.  **Collect**: Fetches a pending job exception from MySQL.
+    -   *Next*: `retrieve` if job found, else `END`.
+2.  **Retrieve**: Searches Milvus for similar historical cases and relevant documentation snippets based on the error message.
+    -   *Next*: `diagnose`.
+3.  **Diagnose**: Uses LLM (GPT-4o-mini) to analyze the job info and retrieved context.
+    -   *Retry Policy*: Retries up to 3 times on transient errors.
+    -   *Next*: `store` on success, `handle_error` on failure.
+4.  **Store**: Saves the structured diagnosis result to MySQL.
+    -   *Next*: `accumulate`.
+5.  **Accumulate**: If the diagnosis confidence > 0.8, vectorizes the result and adds it to Milvus for future reference.
+    -   *Next*: `END`.
+6.  **Handle Error**: Captures workflow errors and updates the job status to failed.
+
+## Configuration
+
+Configuration is managed via environment variables (loaded from `.env`).
+
+| Prefix | Category | Key Settings |
+| :--- | :--- | :--- |
+| `APP_` | General | `ENV`, `DEBUG`, `LOG_LEVEL` |
+| `MYSQL_` | Database | `HOST`, `PORT`, `USER`, `PASSWORD`, `DATABASE` |
+| `MILVUS_` | Vector DB | `HOST`, `PORT`, `TOKEN`, `CASES_COLLECTION`, `DOCS_COLLECTION` |
+| `OPENAI_` | LLM | `API_KEY`, `MODEL`, `EMBEDDING_MODEL`, `TEMPERATURE` |
+| `LANGCHAIN_` | Tracing | `TRACING_V2`, `API_KEY`, `PROJECT` |
+| `SCHEDULER_` | Job Control | `INTERVAL_SECONDS`, `BATCH_SIZE` |
+| `KNOWLEDGE_` | RAG | `CONFIDENCE_THRESHOLD`, `MAX_SIMILAR_CASES` |
 
 ## Development
 
@@ -46,52 +91,32 @@ The diagnosis process follows this state graph:
 1.  **Environment**:
     ```bash
     cp .env.example .env
-    # Configure OPENAI_API_KEY, MYSQL_*, MILVUS_* in .env
+    # Edit .env with your credentials
     ```
 
 2.  **Dependencies**:
     ```bash
     pip install -e ".[dev]"
-    # OR
-    pip install -r requirements-dev.txt
     ```
 
-3.  **Infrastructure (Local)**:
+3.  **Local Infrastructure**:
     ```bash
     cd deploy/docker
     docker compose up -d
     ```
 
-4.  **Database Init**:
+4.  **Database Initialization**:
     ```bash
-    mysql -h localhost -u oceanus -p oceanus_agent < scripts/init_db.sql
+    # Initialize MySQL schema
+    mysql -h 127.0.0.1 -P 3306 -u root -p oceanus_agent < scripts/init_db.sql
+    
+    # Initialize Milvus collections
     python scripts/init_milvus.py
     ```
 
 ### Common Commands
 
--   **Run Agent**:
-    ```bash
-    python -m oceanus_agent
-    ```
-
--   **Run Tests**:
-    ```bash
-    pytest tests/ -v
-    ```
-
--   **Linting**:
-    ```bash
-    ruff check src/
-    ```
-
-## Configuration
-
-Configuration is handled via environment variables (loaded from `.env`). Key prefixes:
--   `APP_`: General app settings (env, debug, log_level).
--   `MYSQL_`: Database credentials.
--   `MILVUS_`: Vector DB connection and collection names.
--   `OPENAI_`: API key, model, and embedding model.
--   `LANGCHAIN_`: LangSmith tracing.
--   `SCHEDULER_`: Job polling interval.
--   `KNOWLEDGE_`: Thresholds for RAG and accumulation.
+-   **Run Agent**: `python -m oceanus_agent`
+-   **Run Tests**: `pytest tests/ -v`
+-   **Linting**: `ruff check src/`
+-   **Type Checking**: `mypy src/`

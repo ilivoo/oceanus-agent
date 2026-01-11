@@ -21,9 +21,7 @@ class TestLLMService:
             return service
 
     @pytest.mark.asyncio
-    async def test_generate_embedding_success(
-        self, llm_service: LLMService
-    ) -> None:
+    async def test_generate_embedding_success(self, llm_service: LLMService) -> None:
         """测试 embedding 生成成功."""
         mock_response = MagicMock()
         mock_response.data = [MagicMock(embedding=[0.1] * 1536)]
@@ -146,9 +144,7 @@ class TestLLMService:
     ) -> None:
         """测试错误分类会转换为小写."""
         mock_response = MagicMock()
-        mock_response.choices = [
-            MagicMock(message=MagicMock(content="BACKPRESSURE"))
-        ]
+        mock_response.choices = [MagicMock(message=MagicMock(content="BACKPRESSURE"))]
         llm_service.client.chat.completions.create = AsyncMock(
             return_value=mock_response
         )
@@ -188,9 +184,7 @@ class TestLLMService:
 
         for error_type in valid_types:
             mock_response = MagicMock()
-            mock_response.choices = [
-                MagicMock(message=MagicMock(content=error_type))
-            ]
+            mock_response.choices = [MagicMock(message=MagicMock(content=error_type))]
             llm_service.client.chat.completions.create = AsyncMock(
                 return_value=mock_response
             )
@@ -263,10 +257,7 @@ class TestBuildContextString:
         self, llm_service: LLMService, sample_retrieved_case: dict
     ) -> None:
         """测试案例数量限制为3个."""
-        cases = [
-            {**sample_retrieved_case, "case_id": f"case_{i}"}
-            for i in range(5)
-        ]
+        cases = [{**sample_retrieved_case, "case_id": f"case_{i}"} for i in range(5)]
         context: RetrievedContext = {
             "similar_cases": cases,
             "doc_snippets": [],

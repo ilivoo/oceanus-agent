@@ -30,7 +30,7 @@ structlog.configure(
         structlog.processors.TimeStamper(fmt="iso"),
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
-        structlog.processors.JSONRenderer()
+        structlog.processors.JSONRenderer(),
     ],
     wrapper_class=structlog.stdlib.BoundLogger,
     context_class=dict,
@@ -54,12 +54,14 @@ class DiagnosisAgent:
     async def run_diagnosis_batch(self) -> None:
         """Run a batch of diagnosis tasks."""
         self._batch_count += 1
-        batch_id = f"batch_{self._batch_count}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        batch_id = (
+            f"batch_{self._batch_count}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        )
 
         logger.info(
             "Starting diagnosis batch",
             batch_id=batch_id,
-            batch_size=self.settings.scheduler.batch_size
+            batch_size=self.settings.scheduler.batch_size,
         )
 
         processed = 0
@@ -69,8 +71,11 @@ class DiagnosisAgent:
             try:
                 thread_id = f"{batch_id}_{i}"
                 result = await self.workflow.run(thread_id)
+                
+                job_info = result.get("job_info")
+                diagnosis_result = result.get("diagnosis_result")
 
-                if result.get("job_info") is None:
+                if not job_info:
                     logger.info("No more pending exceptions")
                     break
 
@@ -78,16 +83,17 @@ class DiagnosisAgent:
                     processed += 1
                     logger.info(
                         "Diagnosis completed",
-                        job_id=result["job_info"]["job_id"],
-                        confidence=result["diagnosis_result"]["confidence"]
-                        if result.get("diagnosis_result") else None
+                        job_id=job_info["job_id"],
+                        confidence=diagnosis_result["confidence"]
+                        if diagnosis_result
+                        else None,
                     )
                 else:
                     failed += 1
                     logger.warning(
                         "Diagnosis failed",
-                        job_id=result["job_info"]["job_id"],
-                        error=result.get("error")
+                        job_id=job_info["job_id"],
+                        error=result.get("error"),
                     )
 
             except Exception as e:
@@ -98,7 +104,7 @@ class DiagnosisAgent:
             "Diagnosis batch completed",
             batch_id=batch_id,
             processed=processed,
-            failed=failed
+            failed=failed,
         )
 
     async def start(self) -> None:
@@ -107,7 +113,7 @@ class DiagnosisAgent:
             "Starting Oceanus Diagnosis Agent",
             env=self.settings.app.env,
             interval_seconds=self.settings.scheduler.interval_seconds,
-            batch_size=self.settings.scheduler.batch_size
+            batch_size=self.settings.scheduler.batch_size,
         )
 
         self.running = True
@@ -115,12 +121,10 @@ class DiagnosisAgent:
         # Configure scheduled job
         self.scheduler.add_job(
             self.run_diagnosis_batch,
-            trigger=IntervalTrigger(
-                seconds=self.settings.scheduler.interval_seconds
-            ),
+            trigger=IntervalTrigger(seconds=self.settings.scheduler.interval_seconds),
             id="diagnosis_batch",
             name="Run Diagnosis Batch",
-            replace_existing=True
+            replace_existing=True,
         )
 
         self.scheduler.start()

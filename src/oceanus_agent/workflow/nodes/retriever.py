@@ -18,7 +18,7 @@ class KnowledgeRetriever:
         self,
         milvus_service: MilvusService,
         llm_service: LLMService,
-        settings: KnowledgeSettings
+        settings: KnowledgeSettings,
     ):
         self.milvus_service = milvus_service
         self.llm_service = llm_service
@@ -41,7 +41,9 @@ class KnowledgeRetriever:
 
         try:
             # Build query text from error message
-            query_text = f"{job_info.get('error_type', '')} {job_info['error_message'][:1000]}"
+            query_text = (
+                f"{job_info.get('error_type', '')} {job_info['error_message'][:1000]}"
+            )
 
             # Generate embedding
             query_vector = await self.llm_service.generate_embedding(query_text)
@@ -50,43 +52,36 @@ class KnowledgeRetriever:
             similar_cases = await self.milvus_service.search_similar_cases(
                 query_vector=query_vector,
                 error_type=job_info.get("error_type"),
-                limit=self.settings.max_similar_cases
+                limit=self.settings.max_similar_cases,
             )
 
             # Search for relevant documentation
             doc_snippets = await self.milvus_service.search_doc_snippets(
-                query_vector=query_vector,
-                limit=self.settings.max_doc_snippets
+                query_vector=query_vector, limit=self.settings.max_doc_snippets
             )
 
             context: RetrievedContext = {
                 "similar_cases": similar_cases,
-                "doc_snippets": doc_snippets
+                "doc_snippets": doc_snippets,
             }
 
             logger.info(
                 "Retrieved knowledge context",
                 job_id=job_info["job_id"],
                 cases_found=len(similar_cases),
-                docs_found=len(doc_snippets)
+                docs_found=len(doc_snippets),
             )
 
-            return {
-                **state,
-                "retrieved_context": context
-            }
+            return {**state, "retrieved_context": context}
 
         except Exception as e:
             logger.warning(
                 "Error retrieving knowledge, continuing without context",
                 job_id=job_info["job_id"],
-                error=str(e)
+                error=str(e),
             )
             # Continue without context - diagnosis can still proceed
             return {
                 **state,
-                "retrieved_context": {
-                    "similar_cases": [],
-                    "doc_snippets": []
-                }
+                "retrieved_context": {"similar_cases": [], "doc_snippets": []},
             }
