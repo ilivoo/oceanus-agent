@@ -147,6 +147,7 @@ class MilvusService:
                 "root_cause",
                 "solution",
             ],
+            consistency_level="Strong",
         )
 
         cases = []
@@ -190,6 +191,7 @@ class MilvusService:
             limit=limit,
             filter=filter_expr if filter_expr else None,
             output_fields=["doc_id", "title", "content", "doc_url", "category"],
+            consistency_level="Strong"
         )
 
         docs = []
