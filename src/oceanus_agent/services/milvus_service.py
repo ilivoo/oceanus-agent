@@ -1,17 +1,14 @@
 """Milvus vector database service for knowledge retrieval."""
 
-from typing import List, Optional
+
 import structlog
 from pymilvus import (
-    MilvusClient,
     DataType,
-    CollectionSchema,
-    FieldSchema,
+    MilvusClient,
 )
 
 from oceanus_agent.config.settings import MilvusSettings
 from oceanus_agent.models.state import RetrievedCase, RetrievedDoc
-
 
 logger = structlog.get_logger()
 
@@ -21,7 +18,7 @@ class MilvusService:
 
     def __init__(self, settings: MilvusSettings):
         self.settings = settings
-        self.client = MilvusClient(uri=settings.uri, token=settings.token)
+        self.client = MilvusClient(uri=settings.uri, token=settings.token_value)
         self._ensure_collections()
 
     def _ensure_collections(self) -> None:
@@ -150,10 +147,10 @@ class MilvusService:
 
     async def search_similar_cases(
         self,
-        query_vector: List[float],
-        error_type: Optional[str] = None,
+        query_vector: list[float],
+        error_type: str | None = None,
         limit: int = 3
-    ) -> List[RetrievedCase]:
+    ) -> list[RetrievedCase]:
         """Search for similar historical cases.
 
         Args:
@@ -201,10 +198,10 @@ class MilvusService:
 
     async def search_doc_snippets(
         self,
-        query_vector: List[float],
-        category: Optional[str] = None,
+        query_vector: list[float],
+        category: str | None = None,
         limit: int = 3
-    ) -> List[RetrievedDoc]:
+    ) -> list[RetrievedDoc]:
         """Search for relevant documentation snippets.
 
         Args:
@@ -250,7 +247,7 @@ class MilvusService:
     async def insert_case(
         self,
         case_id: str,
-        vector: List[float],
+        vector: list[float],
         error_type: str,
         error_pattern: str,
         root_cause: str,
@@ -289,11 +286,11 @@ class MilvusService:
     async def insert_doc(
         self,
         doc_id: str,
-        vector: List[float],
+        vector: list[float],
         title: str,
         content: str,
-        doc_url: Optional[str] = None,
-        category: Optional[str] = None
+        doc_url: str | None = None,
+        category: str | None = None
     ) -> None:
         """Insert a new document into the knowledge base.
 
@@ -339,7 +336,7 @@ class MilvusService:
         ]:
             if self.client.has_collection(collection_name):
                 info = self.client.describe_collection(collection_name)
-                
+
                 # Use query to get count as num_entities is not available on MilvusClient
                 primary_key = "case_id" if collection_name == self.settings.cases_collection else "doc_id"
                 res = self.client.query(

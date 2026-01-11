@@ -1,30 +1,26 @@
 """LLM service for diagnosis using OpenAI."""
 
-from typing import List, Optional
 import json
 
+import structlog
 from openai import AsyncOpenAI
 from tenacity import retry, stop_after_attempt, wait_exponential
-import structlog
 
-from oceanus_agent.config.settings import OpenAISettings
 from oceanus_agent.config.prompts import (
+    CASE_TEMPLATE,
+    CONTEXT_TEMPLATE,
     DIAGNOSIS_SYSTEM_PROMPT,
     DIAGNOSIS_USER_PROMPT,
-    ERROR_CLASSIFICATION_PROMPT,
-    CONTEXT_TEMPLATE,
-    CASE_TEMPLATE,
     DOC_TEMPLATE,
+    ERROR_CLASSIFICATION_PROMPT,
 )
+from oceanus_agent.config.settings import OpenAISettings
+from oceanus_agent.models.diagnosis import DiagnosisOutput
 from oceanus_agent.models.state import (
+    DiagnosisResult,
     JobInfo,
     RetrievedContext,
-    DiagnosisResult,
-    RetrievedCase,
-    RetrievedDoc,
 )
-from oceanus_agent.models.diagnosis import DiagnosisOutput, Priority
-
 
 logger = structlog.get_logger()
 
@@ -35,7 +31,7 @@ class LLMService:
     def __init__(self, settings: OpenAISettings):
         self.settings = settings
         self.client = AsyncOpenAI(
-            api_key=settings.api_key,
+            api_key=settings.api_key.get_secret_value(),
             base_url=settings.base_url,
             timeout=settings.timeout
         )
@@ -44,7 +40,7 @@ class LLMService:
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10)
     )
-    async def generate_embedding(self, text: str) -> List[float]:
+    async def generate_embedding(self, text: str) -> list[float]:
         """Generate embedding for text.
 
         Args:
@@ -66,7 +62,7 @@ class LLMService:
     async def generate_diagnosis(
         self,
         job_info: JobInfo,
-        context: Optional[RetrievedContext] = None
+        context: RetrievedContext | None = None
     ) -> DiagnosisResult:
         """Generate diagnosis for a job exception.
 
@@ -185,7 +181,7 @@ class LLMService:
 
     def _build_context_string(
         self,
-        context: Optional[RetrievedContext]
+        context: RetrievedContext | None
     ) -> str:
         """Build context string from retrieved context.
 

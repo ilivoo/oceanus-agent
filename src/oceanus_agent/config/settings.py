@@ -1,8 +1,8 @@
 """Application settings using Pydantic Settings."""
 
-from typing import Optional
+
 from dotenv import load_dotenv
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 load_dotenv()
@@ -15,18 +15,18 @@ class MySQLSettings(BaseSettings):
     host: str = "localhost"
     port: int = 3306
     user: str = "root"
-    password: str = ""
+    password: SecretStr = SecretStr("")
     database: str = "oceanus_agent"
 
     @property
     def url(self) -> str:
         """Get async MySQL connection URL."""
-        return f"mysql+aiomysql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+        return f"mysql+aiomysql://{self.user}:{self.password.get_secret_value()}@{self.host}:{self.port}/{self.database}"
 
     @property
     def sync_url(self) -> str:
         """Get sync MySQL connection URL."""
-        return f"mysql+pymysql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+        return f"mysql+pymysql://{self.user}:{self.password.get_secret_value()}@{self.host}:{self.port}/{self.database}"
 
 
 class MilvusSettings(BaseSettings):
@@ -35,7 +35,7 @@ class MilvusSettings(BaseSettings):
 
     host: str = "localhost"
     port: int = 19530
-    token: Optional[str] = None
+    token: SecretStr | None = None
 
     # Collection names
     cases_collection: str = "flink_cases"
@@ -49,12 +49,17 @@ class MilvusSettings(BaseSettings):
         """Get Milvus connection URI."""
         return f"http://{self.host}:{self.port}"
 
+    @property
+    def token_value(self) -> str | None:
+        """Get token actual value."""
+        return self.token.get_secret_value() if self.token else None
+
 
 class OpenAISettings(BaseSettings):
     """OpenAI API configuration."""
     model_config = SettingsConfigDict(env_prefix="OPENAI_")
 
-    api_key: str = ""
+    api_key: SecretStr = SecretStr("")
     base_url: str = "https://api.openai.com/v1"
     model: str = "gpt-4o-mini"
     embedding_model: str = "text-embedding-3-small"
@@ -70,7 +75,7 @@ class LangSmithSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="LANGCHAIN_")
 
     tracing_v2: bool = Field(default=True, alias="LANGCHAIN_TRACING_V2")
-    api_key: str = Field(default="", alias="LANGCHAIN_API_KEY")
+    api_key: SecretStr = Field(default=SecretStr(""), alias="LANGCHAIN_API_KEY")
     project: str = Field(default="oceanus-agent", alias="LANGCHAIN_PROJECT")
     endpoint: str = Field(
         default="https://api.smith.langchain.com",
