@@ -1,8 +1,11 @@
 """Application settings using Pydantic Settings."""
 
 from typing import Optional
+from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+load_dotenv()
 
 
 class MySQLSettings(BaseSettings):

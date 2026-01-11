@@ -3,6 +3,7 @@
 import asyncio
 import signal
 import sys
+import logging
 from datetime import datetime
 from typing import Optional
 
@@ -14,6 +15,13 @@ from oceanus_agent.config.settings import Settings, settings
 from oceanus_agent.workflow.graph import DiagnosisWorkflow
 from oceanus_agent.models.state import DiagnosisStatus
 
+
+# Configure basic logging first
+logging.basicConfig(
+    format="%(message)s",
+    stream=sys.stdout,
+    level=logging.INFO,
+)
 
 # Configure structured logging
 structlog.configure(

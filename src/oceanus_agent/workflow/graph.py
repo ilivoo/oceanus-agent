@@ -66,9 +66,12 @@ def handle_error(state: DiagnosisState) -> DiagnosisState:
     """
     from datetime import datetime
 
+    job_info = state.get("job_info")
+    job_id = job_info.get("job_id") if job_info else "unknown"
+
     logger.error(
         "Workflow error",
-        job_id=state.get("job_info", {}).get("job_id"),
+        job_id=job_id,
         error=state.get("error")
     )
 
