@@ -1,8 +1,8 @@
 """Models for knowledge base entities."""
 
-from typing import Optional
 from datetime import datetime
 from enum import Enum
+
 from pydantic import BaseModel, Field
 
 
@@ -19,7 +19,7 @@ class KnowledgeCase(BaseModel):
     error_pattern: str = Field(description="Generalized error pattern")
     root_cause: str = Field(description="Root cause of the error")
     solution: str = Field(description="Solution to fix the error")
-    source_exception_id: Optional[int] = Field(
+    source_exception_id: int | None = Field(
         default=None,
         description="ID of the source exception if auto-generated"
     )
@@ -28,7 +28,7 @@ class KnowledgeCase(BaseModel):
         default=False,
         description="Whether this case has been verified by humans"
     )
-    created_at: Optional[datetime] = None
+    created_at: datetime | None = None
 
 
 class FlinkDocument(BaseModel):
@@ -36,15 +36,15 @@ class FlinkDocument(BaseModel):
     doc_id: str = Field(description="Unique identifier for the document")
     title: str = Field(description="Document title")
     content: str = Field(description="Document content or snippet")
-    doc_url: Optional[str] = Field(
+    doc_url: str | None = Field(
         default=None,
         description="URL to the original document"
     )
-    category: Optional[str] = Field(
+    category: str | None = Field(
         default=None,
         description="Document category (e.g., checkpoint, state, networking)"
     )
-    created_at: Optional[datetime] = None
+    created_at: datetime | None = None
 
 
 class MilvusCaseRecord(BaseModel):
@@ -63,5 +63,5 @@ class MilvusDocRecord(BaseModel):
     vector: list[float]
     title: str
     content: str
-    doc_url: Optional[str] = None
-    category: Optional[str] = None
+    doc_url: str | None = None
+    category: str | None = None

@@ -1,20 +1,19 @@
 """LangGraph workflow definition for diagnosis."""
 
-from langgraph.graph import StateGraph, END, START
-from langgraph.checkpoint.memory import MemorySaver
 import structlog
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, START, StateGraph
 
-from oceanus_agent.models.state import DiagnosisState, DiagnosisStatus
-from oceanus_agent.workflow.nodes.collector import JobCollector
-from oceanus_agent.workflow.nodes.retriever import KnowledgeRetriever
-from oceanus_agent.workflow.nodes.diagnoser import LLMDiagnoser
-from oceanus_agent.workflow.nodes.storer import ResultStorer
-from oceanus_agent.workflow.nodes.accumulator import KnowledgeAccumulator
-from oceanus_agent.services.mysql_service import MySQLService
-from oceanus_agent.services.milvus_service import MilvusService
-from oceanus_agent.services.llm_service import LLMService
 from oceanus_agent.config.settings import Settings
-
+from oceanus_agent.models.state import DiagnosisState, DiagnosisStatus
+from oceanus_agent.services.llm_service import LLMService
+from oceanus_agent.services.milvus_service import MilvusService
+from oceanus_agent.services.mysql_service import MySQLService
+from oceanus_agent.workflow.nodes.accumulator import KnowledgeAccumulator
+from oceanus_agent.workflow.nodes.collector import JobCollector
+from oceanus_agent.workflow.nodes.diagnoser import LLMDiagnoser
+from oceanus_agent.workflow.nodes.retriever import KnowledgeRetriever
+from oceanus_agent.workflow.nodes.storer import ResultStorer
 
 logger = structlog.get_logger()
 

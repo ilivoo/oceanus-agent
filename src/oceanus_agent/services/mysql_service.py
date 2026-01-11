@@ -1,17 +1,15 @@
 """MySQL database service for exception and knowledge case management."""
 
-from typing import Optional, List
-from datetime import datetime
 import json
+from datetime import datetime
 
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
 import structlog
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 from oceanus_agent.config.settings import MySQLSettings
-from oceanus_agent.models.state import JobInfo, DiagnosisResult
-
+from oceanus_agent.models.state import DiagnosisResult, JobInfo
 
 logger = structlog.get_logger()
 
@@ -33,7 +31,7 @@ class MySQLService:
             expire_on_commit=False
         )
 
-    async def get_pending_exception(self) -> Optional[JobInfo]:
+    async def get_pending_exception(self) -> JobInfo | None:
         """Get one pending exception for diagnosis.
 
         Returns:
@@ -174,7 +172,7 @@ class MySQLService:
         error_pattern: str,
         root_cause: str,
         solution: str,
-        source_exception_id: Optional[int] = None,
+        source_exception_id: int | None = None,
         source_type: str = "auto"
     ) -> None:
         """Insert a new knowledge case.

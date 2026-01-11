@@ -1,20 +1,18 @@
 """Application entry point for the Oceanus Diagnosis Agent."""
 
 import asyncio
+import logging
 import signal
 import sys
-import logging
 from datetime import datetime
-from typing import Optional
 
+import structlog
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-import structlog
 
 from oceanus_agent.config.settings import Settings, settings
-from oceanus_agent.workflow.graph import DiagnosisWorkflow
 from oceanus_agent.models.state import DiagnosisStatus
-
+from oceanus_agent.workflow.graph import DiagnosisWorkflow
 
 # Configure basic logging first
 logging.basicConfig(
@@ -46,7 +44,7 @@ logger = structlog.get_logger()
 class DiagnosisAgent:
     """Main diagnosis agent application."""
 
-    def __init__(self, app_settings: Optional[Settings] = None):
+    def __init__(self, app_settings: Settings | None = None):
         self.settings = app_settings or settings
         self.scheduler = AsyncIOScheduler()
         self.workflow = DiagnosisWorkflow(self.settings)

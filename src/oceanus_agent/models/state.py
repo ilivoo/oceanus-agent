@@ -1,8 +1,7 @@
 """LangGraph state definitions for the diagnosis workflow."""
 
-from typing import TypedDict, Optional, List, Any
 from enum import Enum
-from datetime import datetime
+from typing import TypedDict
 
 
 class DiagnosisStatus(str, Enum):
@@ -17,11 +16,11 @@ class JobInfo(TypedDict):
     """Information about a Flink job exception."""
     exception_id: int
     job_id: str
-    job_name: Optional[str]
-    job_type: Optional[str]
-    job_config: Optional[dict]
+    job_name: str | None
+    job_type: str | None
+    job_config: dict | None
     error_message: str
-    error_type: Optional[str]
+    error_type: str | None
     created_at: str
 
 
@@ -40,15 +39,15 @@ class RetrievedDoc(TypedDict):
     doc_id: str
     title: str
     content: str
-    doc_url: Optional[str]
-    category: Optional[str]
+    doc_url: str | None
+    category: str | None
     similarity_score: float
 
 
 class RetrievedContext(TypedDict):
     """Context retrieved from the knowledge base."""
-    similar_cases: List[RetrievedCase]
-    doc_snippets: List[RetrievedDoc]
+    similar_cases: list[RetrievedCase]
+    doc_snippets: list[RetrievedDoc]
 
 
 class DiagnosisResult(TypedDict):
@@ -58,7 +57,7 @@ class DiagnosisResult(TypedDict):
     suggested_fix: str
     priority: str  # high, medium, low
     confidence: float  # 0-1
-    related_docs: List[str]
+    related_docs: list[str]
 
 
 class DiagnosisState(TypedDict):
@@ -67,11 +66,11 @@ class DiagnosisState(TypedDict):
     This is the main state object that flows through the LangGraph workflow.
     Each node can read and update fields in this state.
     """
-    job_info: Optional[JobInfo]
+    job_info: JobInfo | None
     status: DiagnosisStatus
-    retrieved_context: Optional[RetrievedContext]
-    diagnosis_result: Optional[DiagnosisResult]
+    retrieved_context: RetrievedContext | None
+    diagnosis_result: DiagnosisResult | None
     start_time: str
-    end_time: Optional[str]
-    error: Optional[str]
+    end_time: str | None
+    error: str | None
     retry_count: int

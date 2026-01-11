@@ -1,12 +1,12 @@
 """Data collection node for the diagnosis workflow."""
 
 from datetime import datetime
-from langsmith import traceable
+
 import structlog
+from langsmith import traceable
 
 from oceanus_agent.models.state import DiagnosisState, DiagnosisStatus
 from oceanus_agent.services.mysql_service import MySQLService
-
 
 logger = structlog.get_logger()
 

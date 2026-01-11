@@ -1,7 +1,7 @@
 """Pydantic models for diagnosis results with structured output."""
 
-from typing import List, Optional
 from enum import Enum
+
 from pydantic import BaseModel, Field
 
 
@@ -34,7 +34,7 @@ class DiagnosisOutput(BaseModel):
         le=1.0,
         description="Confidence level of the diagnosis (0-1)"
     )
-    related_docs: List[str] = Field(
+    related_docs: list[str] = Field(
         default_factory=list,
         description="List of related documentation URLs"
     )
@@ -55,11 +55,11 @@ class ErrorClassification(BaseModel):
 class DiagnosisRequest(BaseModel):
     """Request model for diagnosis API (optional)."""
     job_id: str
-    job_name: Optional[str] = None
-    job_type: Optional[str] = None
-    job_config: Optional[dict] = None
+    job_name: str | None = None
+    job_type: str | None = None
+    job_config: dict | None = None
     error_message: str
-    error_type: Optional[str] = None
+    error_type: str | None = None
 
 
 class DiagnosisResponse(BaseModel):
@@ -67,6 +67,6 @@ class DiagnosisResponse(BaseModel):
     exception_id: int
     job_id: str
     status: str
-    diagnosis: Optional[DiagnosisOutput] = None
-    error: Optional[str] = None
-    processing_time_ms: Optional[int] = None
+    diagnosis: DiagnosisOutput | None = None
+    error: str | None = None
+    processing_time_ms: int | None = None

@@ -1,12 +1,12 @@
 """LLM diagnosis node for the diagnosis workflow."""
 
 from datetime import datetime
-from langsmith import traceable
+
 import structlog
+from langsmith import traceable
 
 from oceanus_agent.models.state import DiagnosisState, DiagnosisStatus
 from oceanus_agent.services.llm_service import LLMService
-
 
 logger = structlog.get_logger()
 
