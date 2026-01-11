@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: oceanus-agent
+  namespace: oceanus-agent
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: oceanus-agent
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: oceanus-agent
+  namespace: oceanus-agent

@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oceanus-agent
+  namespace: oceanus-agent
+  labels:
+    app: oceanus-agent
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oceanus-agent
+  template:
+    metadata:
+      labels:
+        app: oceanus-agent
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: oceanus-agent
+      containers:
+        - name: agent
+          image: your-registry/oceanus-agent:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: oceanus-agent-config
+            - secretRef:
+                name: oceanus-agent-secrets
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            exec:
+              command:
+                - python
+                - -c
+                - "print('healthy')"
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - python
+                - -c
+                - "print('ready')"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+      volumes:
+        - name: logs
+          emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: oceanus-agent
+                topologyKey: kubernetes.io/hostname
