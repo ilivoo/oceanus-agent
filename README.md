@@ -30,7 +30,7 @@ cp .env.example .env
 
 ```bash
 cd deploy/docker
-docker-compose up -d mysql milvus etcd minio
+docker compose up -d mysql milvus etcd minio
 ```
 
 ### 3. 初始化数据库

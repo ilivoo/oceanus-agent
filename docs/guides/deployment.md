@@ -19,17 +19,17 @@ export OPENAI_API_KEY=sk-xxx
 export LANGCHAIN_API_KEY=ls-xxx
 
 # 启动所有服务
-docker-compose up -d
+docker compose up -d
 
 # 查看日志
-docker-compose logs -f agent
+docker compose logs -f agent
 ```
 
 ### 1.3 仅启动依赖
 
 ```bash
 # 仅启动 MySQL 和 Milvus
-docker-compose up -d mysql milvus etcd minio
+docker compose up -d mysql milvus etcd minio
 
 # 本地运行 Agent
 python -m oceanus_agent
@@ -142,7 +142,7 @@ kubectl get hpa -n oceanus-agent
 kubectl logs -f deployment/oceanus-agent -n oceanus-agent
 
 # Docker
-docker-compose logs -f agent
+docker compose logs -f agent
 ```
 
 ### 4.2 指标监控

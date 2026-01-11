@@ -339,8 +339,18 @@ class MilvusService:
         ]:
             if self.client.has_collection(collection_name):
                 info = self.client.describe_collection(collection_name)
+                
+                # Use query to get count as num_entities is not available on MilvusClient
+                primary_key = "case_id" if collection_name == self.settings.cases_collection else "doc_id"
+                res = self.client.query(
+                    collection_name=collection_name,
+                    filter=f'{primary_key} != ""',
+                    output_fields=["count(*)"]
+                )
+                count = res[0]["count(*)"] if res else 0
+
                 stats[collection_name] = {
-                    "num_entities": self.client.num_entities(collection_name),
+                    "num_entities": count,
                     "description": info.get("description", "")
                 }
 

@@ -39,14 +39,14 @@ cp .env.example .env
 
 ```bash
 cd deploy/docker
-docker-compose up -d mysql milvus etcd minio
+docker compose up -d mysql milvus etcd minio
 ```
 
 ### 2.2 初始化数据库
 
 ```bash
 # MySQL
-mysql -h localhost -u oceanus -p oceanus_agent < scripts/init_db.sql
+mysql -h 127.0.0.1 -P 3306 -u oceanus -poceanus123 < scripts/init_db.sql
 
 # Milvus
 python scripts/init_milvus.py

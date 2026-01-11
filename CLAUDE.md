@@ -80,7 +80,7 @@ pytest tests/ -v
 ruff check src/
 
 # Docker本地测试
-cd deploy/docker && docker-compose up -d
+cd deploy/docker && docker compose up -d
 ```
 
 ## 开发任务参考
