@@ -1,0 +1,42 @@
+version: 2
+updates:
+  # Python 依赖更新
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      # 开发依赖分组
+      development-dependencies:
+        patterns:
+          - "pytest*"
+          - "ruff"
+          - "mypy"
+          - "pre-commit"
+          - "bandit"
+      # LangChain 生态分组
+      langchain:
+        patterns:
+          - "langchain*"
+          - "langgraph*"
+          - "langsmith*"
+    commit-message:
+      prefix: "deps"
+
+  # GitHub Actions 版本更新
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+
+  # Docker 基础镜像更新
+  - package-ecosystem: "docker"
+    directory: "/deploy/docker"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "docker"
