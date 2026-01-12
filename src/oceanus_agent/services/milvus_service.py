@@ -17,28 +17,49 @@ class MilvusService:
 
     def __init__(self, settings: MilvusSettings):
         self.settings = settings
-        self.client = MilvusClient(uri=settings.uri, token=settings.token_value)
-        self._ensure_collections()
+        self.client = None
+
+    def get_client(self) -> MilvusClient | None:
+        """Get or initialize Milvus client."""
+        if self.client:
+            return self.client
+        
+        try:
+            self.client = MilvusClient(uri=self.settings.uri, token=self.settings.token_value)
+            self._ensure_collections()
+            return self.client
+        except Exception as e:
+            logger.error("Failed to initialize Milvus client", error=str(e))
+            return None
 
     def _ensure_collections(self) -> None:
         """Ensure required collections exist."""
-        # Check and create cases collection
-        if not self.client.has_collection(self.settings.cases_collection):
-            self._create_cases_collection()
-            logger.info(
-                "Created cases collection", collection=self.settings.cases_collection
-            )
+        if not self.client:
+            return
 
-        # Check and create docs collection
-        if not self.client.has_collection(self.settings.docs_collection):
-            self._create_docs_collection()
-            logger.info(
-                "Created docs collection", collection=self.settings.docs_collection
-            )
+        # Check and create cases collection
+        try:
+            if not self.client.has_collection(self.settings.cases_collection):
+                self._create_cases_collection()
+                logger.info(
+                    "Created cases collection", collection=self.settings.cases_collection
+                )
+
+            # Check and create docs collection
+            if not self.client.has_collection(self.settings.docs_collection):
+                self._create_docs_collection()
+                logger.info(
+                    "Created docs collection", collection=self.settings.docs_collection
+                )
+        except Exception as e:
+            logger.error("Failed to ensure collections", error=str(e))
 
     def _create_cases_collection(self) -> None:
         """Create the flink_cases collection."""
+        if not self.client:
+            return
         schema = self.client.create_schema(auto_id=False, enable_dynamic_field=False)
+        # ... (rest of the schema definition) ...
 
         schema.add_field(
             field_name="case_id",
@@ -131,11 +152,16 @@ class MilvusService:
         Returns:
             List of similar cases.
         """
+        client = self.get_client()
+        if not client:
+            logger.warning("Milvus client not available for search")
+            return []
+
         filter_expr = ""
         if error_type:
             filter_expr = f'error_type == "{error_type}"'
 
-        results = self.client.search(
+        results = client.search(
             collection_name=self.settings.cases_collection,
             data=[query_vector],
             limit=limit,
