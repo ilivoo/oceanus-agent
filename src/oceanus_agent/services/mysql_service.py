@@ -6,7 +6,6 @@ from datetime import datetime
 import structlog
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import sessionmaker
 
 from oceanus_agent.config.settings import MySQLSettings
 from oceanus_agent.models.state import DiagnosisResult, JobInfo

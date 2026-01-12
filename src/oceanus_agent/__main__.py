@@ -71,7 +71,7 @@ class DiagnosisAgent:
             try:
                 thread_id = f"{batch_id}_{i}"
                 result = await self.workflow.run(thread_id)
-                
+
                 job_info = result.get("job_info")
                 diagnosis_result = result.get("diagnosis_result")
 

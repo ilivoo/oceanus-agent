@@ -1,11 +1,12 @@
 """LangGraph workflow definition for diagnosis."""
 
+from typing import cast
+
 import structlog
-from typing import Any, cast
+from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
-from langchain_core.runnables import RunnableConfig
 
 from oceanus_agent.config.settings import Settings
 from oceanus_agent.models.state import DiagnosisState, DiagnosisStatus
