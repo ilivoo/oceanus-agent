@@ -87,6 +87,7 @@
     *   Python: `./.venv/bin/python`
     *   工具链: `./.venv/bin/ruff`, `./.venv/bin/mypy`, `./.venv/bin/pytest`
 *   **依赖管理**: 所有依赖定义在 `pyproject.toml`，严禁假设全局包存在。
+*   **质量验证**: **必须**在提交代码或认为任务完成前，执行 `pre-commit run --all-files` 并确保通过。
 
 ### 代码风格
 *   **数据模型**: **强制使用 Pydantic v2**。所有配置、API 交互、内部数据流转必须使用 Pydantic Model，禁止使用裸字典。
@@ -123,8 +124,9 @@ python scripts/init_milvus.py
 python -m oceanus_agent
 
 # 5. 代码质量检查
-ruff check src/      # Linting
-mypy src/            # Type Checking
+pre-commit run --all-files  # 运行所有检查 (推荐)
+ruff check src/             # 仅 Linting
+mypy src/                   # 仅 Type Checking
 
 # 6. 运行测试
 pytest tests/ -v
