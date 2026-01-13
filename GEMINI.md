@@ -124,10 +124,41 @@ Configuration is managed via environment variables (loaded from `.env`).
 ## AI Agent Rules
 
 **Mandatory Workflow for AI Agents:**
-1.  **Virtual Environment**: Always use `.venv/bin/python` or related binaries.
-2.  **Code Quality**: After modifying any code and before considering a task complete, you **MUST** run:
-    ```bash
-    ./.venv/bin/pre-commit run --all-files
-    ```
-    Fix *all* reported errors. Do not ignore them.
-3.  **Tests**: Run relevant tests using `pytest` to ensure no regressions.
+
+### Step 1: Environment Setup
+Always use `.venv/bin/python` or related binaries.
+
+### Step 2: Code Formatting (MANDATORY)
+
+> **CRITICAL**: You MUST format code before considering any task complete.
+> Unformatted code will be REJECTED by CI.
+
+After modifying any code:
+
+```bash
+# Format first
+./.venv/bin/ruff format src/ tests/
+./.venv/bin/ruff check --fix src/ tests/
+
+# Then run full pre-commit
+./.venv/bin/pre-commit run --all-files
+```
+
+**You MUST**:
+- Run pre-commit after EVERY code modification
+- Fix ALL reported errors (do not ignore them)
+- Re-run until all checks pass
+
+**You MUST NOT**:
+- Claim a task is complete without running pre-commit
+- Use `--no-verify` to skip checks
+- Ignore linting or type errors
+
+### Step 3: Testing
+Run relevant tests using `pytest` to ensure no regressions.
+
+### Formatting Standards
+- Line length: 88 characters (Ruff/Black standard)
+- Indentation: 4 spaces (Python)
+- Quotes: Double quotes preferred
+- Import ordering: isort rules (managed by Ruff)

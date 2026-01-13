@@ -87,7 +87,35 @@
     *   Python: `./.venv/bin/python`
     *   工具链: `./.venv/bin/ruff`, `./.venv/bin/mypy`, `./.venv/bin/pytest`
 *   **依赖管理**: 所有依赖定义在 `pyproject.toml`，严禁假设全局包存在。
-*   **质量验证**: **必须**在提交代码或认为任务完成前，执行 `pre-commit run --all-files` 并确保通过。
+
+### 代码格式化 (强制要求)
+
+> **关键规则**: 任何代码修改后，必须在提交前运行格式化检查。不遵守此规则的代码将被 CI 拒绝。
+
+**工作流程**:
+
+1. **编写/修改代码**
+2. **格式化代码** (在提交前):
+   ```bash
+   ./.venv/bin/ruff format src/ tests/
+   ./.venv/bin/ruff check --fix src/ tests/
+   ```
+3. **运行完整检查**:
+   ```bash
+   ./.venv/bin/pre-commit run --all-files
+   ```
+4. **确认所有检查通过后**，再进行 git commit
+
+**禁止行为**:
+- 不运行 pre-commit 就声称任务完成
+- 使用 `--no-verify` 跳过检查
+- 忽略 ruff/mypy 的警告或错误
+
+**格式化标准**:
+- 行长度: 88 字符
+- 缩进: 4 空格 (Python)
+- 引号: 双引号
+- Import 排序: isort 规则 (由 ruff 管理)
 
 ### 代码风格
 *   **数据模型**: **强制使用 Pydantic v2**。所有配置、API 交互、内部数据流转必须使用 Pydantic Model，禁止使用裸字典。
