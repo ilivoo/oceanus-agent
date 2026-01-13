@@ -1,13 +1,14 @@
 name: CodeQL
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+  # Only run on schedule to avoid blocking CI when code scanning is not enabled
+  # To enable on push/PR, first enable Code Scanning in repository settings:
+  # Settings > Security > Code security and analysis > Code scanning
   schedule:
     # Every Monday at 09:00 UTC
     - cron: "0 9 * * 1"
+  # Manual trigger for testing
+  workflow_dispatch:
 
 jobs:
   analyze:

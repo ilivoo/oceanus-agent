@@ -20,14 +20,6 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-
-[project.urls]
-Homepage = "https://github.com/ilivoo/oceanus-agent"
-Repository = "https://github.com/ilivoo/oceanus-agent.git"
-Documentation = "https://github.com/ilivoo/oceanus-agent/tree/main/docs"
-Changelog = "https://github.com/ilivoo/oceanus-agent/blob/main/CHANGELOG.md"
-"Bug Tracker" = "https://github.com/ilivoo/oceanus-agent/issues"
-
 dependencies = [
     "langgraph>=0.2.0",
     "langchain>=0.3.0",
@@ -46,6 +38,13 @@ dependencies = [
     "structlog>=24.1.0",
     "tenacity>=8.3.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/ilivoo/oceanus-agent"
+Repository = "https://github.com/ilivoo/oceanus-agent.git"
+Documentation = "https://github.com/ilivoo/oceanus-agent/tree/main/docs"
+Changelog = "https://github.com/ilivoo/oceanus-agent/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/ilivoo/oceanus-agent/issues"
 
 [project.optional-dependencies]
 dev = [
