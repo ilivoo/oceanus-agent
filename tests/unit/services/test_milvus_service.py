@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from pymilvus import MilvusClient
 
 from oceanus_agent.config.settings import MilvusSettings
 from oceanus_agent.services.milvus_service import MilvusService
@@ -42,27 +41,28 @@ class TestMilvusService:
             client_instance = mock_cls.return_value
             # Simulate collections not existing
             client_instance.has_collection.return_value = False
-            
-            MilvusService(mock_settings)
-            
+
+            service = MilvusService(mock_settings)
+            service.get_client()
+
             # Check has_collection called for both collections
             assert client_instance.has_collection.call_count == 2
-            
+
             # Check create_collection called twice
             assert client_instance.create_collection.call_count == 2
-            
+
             # Verify schema creation
             assert client_instance.create_schema.call_count == 2
-            
+
     def test_init_skips_creation_if_exist(self, mock_settings):
         """Test initialization skips creation if collections exist."""
         with patch("oceanus_agent.services.milvus_service.MilvusClient") as mock_cls:
             client_instance = mock_cls.return_value
             # Simulate collections existing
             client_instance.has_collection.return_value = True
-            
+
             MilvusService(mock_settings)
-            
+
             # Check create_collection NOT called
             client_instance.create_collection.assert_not_called()
 
@@ -82,14 +82,14 @@ class TestMilvusService:
                 "distance": 0.85
             }
         ]]
-        
+
         query_vector = [0.1] * 1536
         results = await milvus_service.search_similar_cases(query_vector, error_type="checkpoint_failure")
-        
+
         assert len(results) == 1
         assert results[0]["case_id"] == "case-1"
         assert results[0]["similarity_score"] == 0.85
-        
+
         # Verify search call
         mock_client.search.assert_called_once()
         call_args = mock_client.search.call_args[1]
@@ -112,14 +112,14 @@ class TestMilvusService:
                 "distance": 0.9
             }
         ]]
-        
+
         query_vector = [0.1] * 1536
         results = await milvus_service.search_doc_snippets(query_vector, category="checkpoint")
-        
+
         assert len(results) == 1
         assert results[0]["doc_id"] == "doc-1"
         assert results[0]["title"] == "Checkpoint Guide"
-        
+
         # Verify search call
         mock_client.search.assert_called_once()
         call_args = mock_client.search.call_args[1]
@@ -138,7 +138,7 @@ class TestMilvusService:
             root_cause="Bad config",
             solution="Fix config"
         )
-        
+
         mock_client.insert.assert_called_once()
         call_args = mock_client.insert.call_args[1]
         assert call_args["collection_name"] == "flink_cases"
@@ -156,7 +156,7 @@ class TestMilvusService:
             doc_url="http://url",
             category="general"
         )
-        
+
         mock_client.insert.assert_called_once()
         call_args = mock_client.insert.call_args[1]
         assert call_args["collection_name"] == "flink_docs"
@@ -166,17 +166,19 @@ class TestMilvusService:
         """Test getting collection statistics."""
         # Mock describe_collection
         mock_client.describe_collection.return_value = {"description": "Test Collection"}
-        
+
         # Mock query for count
         mock_client.query.return_value = [{"count(*)": 100}]
-        
+
         stats = milvus_service.get_collection_stats()
-        
+
         assert "flink_cases" in stats
         assert "flink_docs" in stats
         assert stats["flink_cases"]["num_entities"] == 100
 
     def test_close(self, milvus_service, mock_client):
         """Test closing connection."""
+        # Ensure client is attached
+        milvus_service.client = mock_client
         milvus_service.close()
         mock_client.close.assert_called_once()

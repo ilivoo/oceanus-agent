@@ -35,10 +35,10 @@ class TestLLMDiagnoser:
             },
             "retrieved_context": {}
         }
-        
+
         # Mock classify
         mock_llm_service.classify_error.return_value = "checkpoint_failure"
-        
+
         # Mock diagnosis
         diagnosis_result = {
             "root_cause": "network",
@@ -47,9 +47,9 @@ class TestLLMDiagnoser:
             "priority": "high"
         }
         mock_llm_service.generate_diagnosis.return_value = diagnosis_result
-        
+
         new_state = await diagnoser(state)
-        
+
         assert new_state["diagnosis_result"] == diagnosis_result
         assert new_state["job_info"]["error_type"] == "checkpoint_failure"
         assert new_state["status"] == DiagnosisStatus.IN_PROGRESS
@@ -65,11 +65,11 @@ class TestLLMDiagnoser:
             },
             "retry_count": 0
         }
-        
+
         mock_llm_service.classify_error.side_effect = Exception("LLM Error")
-        
+
         new_state = await diagnoser(state)
-        
+
         assert new_state["retry_count"] == 1
         assert "LLM Error" in new_state["error"]
         assert new_state.get("status") != DiagnosisStatus.FAILED
@@ -84,11 +84,11 @@ class TestLLMDiagnoser:
             },
             "retry_count": 2  # Max is 3, so next failure hits max
         }
-        
+
         mock_llm_service.classify_error.side_effect = Exception("LLM Error")
-        
+
         new_state = await diagnoser(state)
-        
+
         assert new_state["retry_count"] == 3
         assert new_state["status"] == DiagnosisStatus.FAILED
         assert "Diagnosis failed after 3 retries" in new_state["error"]

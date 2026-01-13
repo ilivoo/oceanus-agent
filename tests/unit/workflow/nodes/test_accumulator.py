@@ -36,7 +36,7 @@ class TestKnowledgeAccumulator:
         mock_services["llm"].generate_embedding = AsyncMock()
         mock_services["milvus"].insert_case = AsyncMock()
         mock_services["mysql"].insert_knowledge_case = AsyncMock()
-        
+
         return KnowledgeAccumulator(
             mock_services["mysql"],
             mock_services["milvus"],
@@ -60,11 +60,11 @@ class TestKnowledgeAccumulator:
                 "suggested_fix": "fix"
             }
         }
-        
+
         mock_services["llm"].generate_embedding.return_value = [0.1] * 1536
-        
+
         await accumulator(state)
-        
+
         mock_services["milvus"].insert_case.assert_called_once()
         mock_services["mysql"].insert_knowledge_case.assert_called_once()
 
@@ -77,9 +77,9 @@ class TestKnowledgeAccumulator:
                 "confidence": 0.5,  # Below 0.8 threshold
             }
         }
-        
+
         await accumulator(state)
-        
+
         mock_services["milvus"].insert_case.assert_not_called()
         mock_services["mysql"].insert_knowledge_case.assert_not_called()
 
@@ -98,10 +98,10 @@ class TestKnowledgeAccumulator:
                 "suggested_fix": "fix"
             }
         }
-        
+
         mock_services["llm"].generate_embedding.side_effect = Exception("API Error")
-        
+
         # Should not raise exception
         await accumulator(state)
-        
+
         mock_services["milvus"].insert_case.assert_not_called()

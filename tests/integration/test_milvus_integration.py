@@ -1,7 +1,9 @@
 """Integration tests for Milvus service."""
 
 import pytest
+
 from oceanus_agent.services.milvus_service import MilvusService
+
 
 @pytest.mark.asyncio
 class TestMilvusIntegration:
@@ -9,7 +11,7 @@ class TestMilvusIntegration:
 
     async def test_milvus_collection_and_search(self, real_milvus_service: MilvusService):
         """测试 Milvus 集合创建、数据插入和搜索功能."""
-        
+
         # 1. 验证集合已创建
         stats = real_milvus_service.get_collection_stats()
         assert real_milvus_service.settings.cases_collection in stats
@@ -42,7 +44,7 @@ class TestMilvusIntegration:
 
     async def test_milvus_doc_search(self, real_milvus_service: MilvusService):
         """测试文档片段的搜索."""
-        
+
         doc_id = "test-doc-001"
         vector = [0.5] * 1536
         await real_milvus_service.insert_doc(

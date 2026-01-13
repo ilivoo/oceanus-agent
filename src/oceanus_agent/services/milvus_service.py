@@ -23,7 +23,7 @@ class MilvusService:
         """Get or initialize Milvus client."""
         if self.client:
             return self.client
-        
+
         try:
             self.client = MilvusClient(uri=self.settings.uri, token=self.settings.token_value)
             self._ensure_collections()
@@ -58,6 +58,9 @@ class MilvusService:
         """Create the flink_cases collection."""
         if not self.client:
             return
+        # Help mypy understand self.client is not None here
+        assert self.client is not None
+
         schema = self.client.create_schema(auto_id=False, enable_dynamic_field=False)
         # ... (rest of the schema definition) ...
 
@@ -101,6 +104,11 @@ class MilvusService:
 
     def _create_docs_collection(self) -> None:
         """Create the flink_docs collection."""
+        if not self.client:
+            return
+        # Help mypy understand self.client is not None here
+        assert self.client is not None
+
         schema = self.client.create_schema(auto_id=False, enable_dynamic_field=False)
 
         schema.add_field(
@@ -207,11 +215,16 @@ class MilvusService:
         Returns:
             List of relevant documents.
         """
+        client = self.get_client()
+        if not client:
+            logger.warning("Milvus client not available for search")
+            return []
+
         filter_expr = ""
         if category:
             filter_expr = f'category == "{category}"'
 
-        results = self.client.search(
+        results = client.search(
             collection_name=self.settings.docs_collection,
             data=[query_vector],
             limit=limit,
@@ -257,6 +270,11 @@ class MilvusService:
             root_cause: Root cause of the error.
             solution: Solution to fix the error.
         """
+        client = self.get_client()
+        if not client:
+            logger.warning("Milvus client not available for insert_case")
+            return
+
         data = [
             {
                 "case_id": case_id,
@@ -268,7 +286,7 @@ class MilvusService:
             }
         ]
 
-        self.client.insert(collection_name=self.settings.cases_collection, data=data)
+        client.insert(collection_name=self.settings.cases_collection, data=data)
 
         logger.info("Inserted case to Milvus", case_id=case_id, error_type=error_type)
 
@@ -291,6 +309,11 @@ class MilvusService:
             doc_url: URL to original document.
             category: Document category.
         """
+        client = self.get_client()
+        if not client:
+            logger.warning("Milvus client not available for insert_doc")
+            return
+
         data = [
             {
                 "doc_id": doc_id,
@@ -302,7 +325,7 @@ class MilvusService:
             }
         ]
 
-        self.client.insert(collection_name=self.settings.docs_collection, data=data)
+        client.insert(collection_name=self.settings.docs_collection, data=data)
 
         logger.info("Inserted doc to Milvus", doc_id=doc_id, title=title)
 
@@ -312,14 +335,18 @@ class MilvusService:
         Returns:
             Dictionary with collection statistics.
         """
+        client = self.get_client()
+        if not client:
+            return {}
+
         stats = {}
 
         for collection_name in [
             self.settings.cases_collection,
             self.settings.docs_collection,
         ]:
-            if self.client.has_collection(collection_name):
-                info = self.client.describe_collection(collection_name)
+            if client.has_collection(collection_name):
+                info = client.describe_collection(collection_name)
 
                 # Use query to get count as num_entities is not available on MilvusClient
                 primary_key = (
@@ -327,7 +354,7 @@ class MilvusService:
                     if collection_name == self.settings.cases_collection
                     else "doc_id"
                 )
-                res = self.client.query(
+                res = client.query(
                     collection_name=collection_name,
                     filter=f'{primary_key} != ""',
                     output_fields=["count(*)"],
@@ -343,4 +370,5 @@ class MilvusService:
 
     def close(self) -> None:
         """Close the Milvus connection."""
-        self.client.close()
+        if self.client:
+            self.client.close()

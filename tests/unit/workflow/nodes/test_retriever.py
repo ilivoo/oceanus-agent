@@ -28,7 +28,7 @@ class TestKnowledgeRetriever:
         service = MagicMock(spec=LLMService)
         service.generate_embedding = AsyncMock()
         return service
-    
+
     @pytest.fixture
     def mock_settings(self):
         """Mock KnowledgeSettings."""
@@ -52,13 +52,13 @@ class TestKnowledgeRetriever:
                 "error_message": "timeout"
             }
         }
-        
+
         # Mock LLM embedding
         mock_llm_service.generate_embedding.return_value = [0.1] * 1536
-        
+
         # Mock Milvus search
         mock_case = RetrievedCase(
-            case_id="c1", error_type="checkpoint", error_pattern="p", 
+            case_id="c1", error_type="checkpoint", error_pattern="p",
             root_cause="r", solution="s", similarity_score=0.9
         )
         mock_doc = RetrievedDoc(
@@ -66,15 +66,15 @@ class TestKnowledgeRetriever:
         )
         mock_milvus_service.search_similar_cases.return_value = [mock_case]
         mock_milvus_service.search_doc_snippets.return_value = [mock_doc]
-        
+
         new_state = await retriever(state)
-        
+
         assert "retrieved_context" in new_state
         context = new_state["retrieved_context"]
         assert len(context["similar_cases"]) == 1
         assert len(context["doc_snippets"]) == 1
         assert context["similar_cases"][0] == mock_case
-        
+
         # Verify calls
         mock_llm_service.generate_embedding.assert_called_once()
         mock_milvus_service.search_similar_cases.assert_called_once()
@@ -96,11 +96,11 @@ class TestKnowledgeRetriever:
                 "error_message": "timeout"
             }
         }
-        
+
         mock_llm_service.generate_embedding.side_effect = Exception("API Error")
-        
+
         new_state = await retriever(state)
-        
+
         assert "retrieved_context" in new_state
         assert new_state["retrieved_context"]["similar_cases"] == []
         assert new_state["retrieved_context"]["doc_snippets"] == []

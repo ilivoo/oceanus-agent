@@ -37,9 +37,9 @@ class TestResultStorer:
                 "confidence": 0.9
             }
         }
-        
+
         new_state = await storer(state)
-        
+
         mock_mysql_service.update_diagnosis_result.assert_called_once()
         assert new_state["status"] == DiagnosisStatus.COMPLETED
         assert "end_time" in new_state
@@ -55,13 +55,13 @@ class TestResultStorer:
             "diagnosis_result": None,
             "error": "Diagnosis failed"
         }
-        
+
         new_state = await storer(state)
-        
+
         mock_mysql_service.mark_exception_failed.assert_called_once()
         call_args = mock_mysql_service.mark_exception_failed.call_args[1]
         assert call_args["error_message"] == "Diagnosis failed"
-        
+
         assert new_state["status"] == DiagnosisStatus.FAILED
         assert "end_time" in new_state
 
@@ -75,10 +75,10 @@ class TestResultStorer:
             },
             "diagnosis_result": {"confidence": 0.9}
         }
-        
+
         mock_mysql_service.update_diagnosis_result.side_effect = Exception("DB Error")
-        
+
         new_state = await storer(state)
-        
+
         assert new_state["status"] == DiagnosisStatus.FAILED
         assert "Storage error" in new_state["error"]

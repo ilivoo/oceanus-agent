@@ -1,24 +1,26 @@
 """Integration tests for the diagnosis workflow."""
 
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import AsyncMock, patch
 
 from oceanus_agent.config.settings import settings
-from oceanus_agent.workflow.graph import DiagnosisWorkflow
 from oceanus_agent.models.state import DiagnosisStatus
+from oceanus_agent.workflow.graph import DiagnosisWorkflow
+
 
 @pytest.mark.asyncio
 class TestWorkflowIntegration:
     """Workflow 级别集成测试."""
 
     async def test_complete_workflow_flow(
-        self, 
-        real_mysql_service, 
+        self,
+        real_mysql_service,
         real_milvus_service,
         mock_llm_service
     ):
         """测试从异常发现到结果存储的完整流程."""
-        
+
         # 1. Setup: 插入待处理异常和相关知识案例
         # 1.1 在 Milvus 插入向量 (模拟已有知识)
         await real_milvus_service.insert_case(
@@ -29,7 +31,7 @@ class TestWorkflowIntegration:
             root_cause="Old cause",
             solution="Old solution"
         )
-        
+
         # 1.2 在 MySQL 插入对应的元数据 (可选，取决于 Retriever 是否依赖 MySQL，目前看只依赖 Milvus)
         # 但为了完整性，我们也可以插一条
         await real_mysql_service.insert_knowledge_case(
@@ -40,13 +42,13 @@ class TestWorkflowIntegration:
             solution="Old solution",
             source_type="manual"
         )
-        
+
         # 1.3 插入待处理的任务
         from sqlalchemy import text
         async with real_mysql_service.async_session() as session:
             await session.execute(text("""
-                INSERT INTO flink_job_exceptions 
-                (job_id, job_name, error_message, status) 
+                INSERT INTO flink_job_exceptions
+                (job_id, job_name, error_message, status)
                 VALUES ('wf-test-001', 'Test Job', 'Checkpoint timeout', 'pending')
             """))
             await session.commit()
@@ -56,9 +58,9 @@ class TestWorkflowIntegration:
         with patch("oceanus_agent.workflow.graph.MySQLService", return_value=real_mysql_service), \
              patch("oceanus_agent.workflow.graph.MilvusService", return_value=real_milvus_service), \
              patch("oceanus_agent.workflow.graph.LLMService", return_value=mock_llm_service):
-            
+
             workflow = DiagnosisWorkflow(settings)
-            
+
             # 3. 运行工作流
             result = await workflow.run(thread_id="test-thread-1")
 
@@ -66,7 +68,7 @@ class TestWorkflowIntegration:
             assert result["status"] == DiagnosisStatus.COMPLETED
             assert result["job_info"]["job_id"] == "wf-test-001"
             assert result["diagnosis_result"] is not None
-            
+
             # 5. 断言数据库已更新
             async with real_mysql_service.async_session() as session:
                 res = await session.execute(text(
@@ -76,7 +78,7 @@ class TestWorkflowIntegration:
 
             # 6. 断言知识积累 (如果 confidence > 0.8)
             # 在 mock_llm_service 中默认返回 confidence 0.85
-            
+
             # 6.1 验证 MySQL 中有两条知识案例 (1条 setup, 1条 accumulated)
             async with real_mysql_service.async_session() as session:
                 res = await session.execute(text("SELECT COUNT(*) FROM knowledge_cases"))

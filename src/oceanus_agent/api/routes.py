@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
 from oceanus_agent.config.settings import settings
@@ -14,7 +14,7 @@ class HealthResponse(BaseModel):
 
 
 @router.get("/health", response_model=HealthResponse)
-async def health_check():
+async def health_check() -> HealthResponse:
     """Health check endpoint."""
     return HealthResponse(
         status="healthy",
@@ -24,7 +24,7 @@ async def health_check():
 
 
 @router.get("/ready")
-async def readiness_check():
+async def readiness_check() -> dict[str, str]:
     """Readiness check (database connectivity)."""
     try:
         service = MySQLService(settings.mysql)

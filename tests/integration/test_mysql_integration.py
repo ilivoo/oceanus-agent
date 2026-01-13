@@ -2,8 +2,10 @@
 
 import pytest
 from sqlalchemy import text
-from oceanus_agent.services.mysql_service import MySQLService
+
 from oceanus_agent.models.state import DiagnosisResult
+from oceanus_agent.services.mysql_service import MySQLService
+
 
 @pytest.mark.asyncio
 class TestMySQLIntegration:
@@ -11,13 +13,13 @@ class TestMySQLIntegration:
 
     async def test_get_pending_exception_lifecycle(self, real_mysql_service: MySQLService):
         """测试异常任务的完整生命周期：插入 -> 获取 -> 更新."""
-        
+
         # 1. 准备数据：手动插入一个 pending 异常
         async with real_mysql_service.async_session() as session:
             query = text("""
-                INSERT INTO flink_job_exceptions 
+                INSERT INTO flink_job_exceptions
                 (job_id, job_name, job_type, error_message, status, job_config)
-                VALUES 
+                VALUES
                 (:job_id, :job_name, :job_type, :error_message, 'pending', :job_config)
             """)
             await session.execute(query, {
@@ -31,7 +33,7 @@ class TestMySQLIntegration:
 
         # 2. 调用服务获取待处理任务
         job_info = await real_mysql_service.get_pending_exception()
-        
+
         assert job_info is not None
         assert job_info["job_id"] == "int-test-001"
         assert job_info["job_config"] == {"parallelism": 2}
@@ -53,7 +55,7 @@ class TestMySQLIntegration:
             "confidence": 0.95,
             "related_docs": ["http://example.com/doc"]
         }
-        
+
         await real_mysql_service.update_diagnosis_result(
             exception_id=job_info["exception_id"],
             diagnosis=diagnosis
@@ -71,7 +73,7 @@ class TestMySQLIntegration:
 
     async def test_knowledge_case_persistence(self, real_mysql_service: MySQLService):
         """测试知识库案例的持久化."""
-        
+
         # 插入知识案例
         await real_mysql_service.insert_knowledge_case(
             case_id="int-case-001",
@@ -94,7 +96,7 @@ class TestMySQLIntegration:
 
     async def test_get_pending_count(self, real_mysql_service: MySQLService):
         """测试获取待处理任务计数."""
-        
+
         # 插入 3 条记录
         async with real_mysql_service.async_session() as session:
             for i in range(3):

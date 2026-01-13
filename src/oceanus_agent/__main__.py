@@ -38,7 +38,7 @@ logger = structlog.get_logger()
 def main() -> None:
     """Main entry point starting the FastAPI server and background agent."""
     logger.info("Starting Oceanus Agent Server", debug=settings.app.debug)
-    
+
     uvicorn.run(
         "oceanus_agent.api.app:app",
         host="0.0.0.0",
