@@ -1,0 +1,41 @@
+name: Stale Issues and PRs
+
+on:
+  schedule:
+    # Every day at 00:00 UTC
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/stale@v9
+        with:
+          # Issue configuration
+          stale-issue-message: |
+            此 Issue 已超过 30 天没有活动。
+            如果问题仍然存在，请回复此评论以保持 Issue 开启。
+            否则，此 Issue 将在 7 天后自动关闭。
+          stale-issue-label: "status/stale"
+          days-before-issue-stale: 30
+          days-before-issue-close: 7
+          exempt-issue-labels: "priority/critical,priority/high,status/blocked"
+
+          # PR configuration
+          stale-pr-message: |
+            此 Pull Request 已超过 14 天没有活动。
+            请更新 PR 或回复此评论以保持开启。
+            否则，此 PR 将在 7 天后自动关闭。
+          stale-pr-label: "status/stale"
+          days-before-pr-stale: 14
+          days-before-pr-close: 7
+          exempt-pr-labels: "status/blocked,status/review-needed"
+
+          # Common configuration
+          remove-stale-when-updated: true
+          operations-per-run: 100
