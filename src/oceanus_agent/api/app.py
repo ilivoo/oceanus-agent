@@ -12,6 +12,7 @@ from oceanus_agent.config.settings import settings
 
 logger = structlog.get_logger()
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Manage application lifecycle."""
@@ -53,6 +54,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         scheduler.shutdown(wait=False)
     await agent.workflow.close()
 
+
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(
@@ -65,5 +67,6 @@ def create_app() -> FastAPI:
     app.include_router(router, prefix="/api/v1")
 
     return app
+
 
 app = create_app()

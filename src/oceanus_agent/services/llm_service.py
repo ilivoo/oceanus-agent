@@ -1,6 +1,7 @@
 """LLM service for diagnosis using OpenAI."""
 
 import json
+from typing import cast
 
 import structlog
 from openai import AsyncOpenAI
@@ -52,7 +53,7 @@ class LLMService:
             model=self.settings.embedding_model,
             input=text[:8000],  # Truncate to avoid token limit
         )
-        return response.data[0].embedding
+        return cast(list[float], response.data[0].embedding)
 
     @retry(
         stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)

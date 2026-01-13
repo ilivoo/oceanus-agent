@@ -4,8 +4,6 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from pydantic import SecretStr
-
 from oceanus_agent.config.settings import (
     KnowledgeSettings,
     MilvusSettings,
@@ -21,6 +19,7 @@ from oceanus_agent.models.state import (
     RetrievedContext,
     RetrievedDoc,
 )
+from pydantic import SecretStr
 
 # ============ Settings Fixtures ============
 

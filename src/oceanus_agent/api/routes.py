@@ -31,10 +31,11 @@ async def readiness_check() -> dict[str, str]:
         # Just check if we can connect
         async with service.async_session() as session:
             from sqlalchemy import text
+
             await session.execute(text("SELECT 1"))
         return {"status": "ready"}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Database not ready: {str(e)}"
+            detail=f"Database not ready: {str(e)}",
         )

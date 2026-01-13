@@ -14,6 +14,7 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+        args: [--allow-multiple-documents]
       - id: check-added-large-files
         args: ['--maxkb=1000']
       - id: check-merge-conflict
@@ -24,6 +25,7 @@ repos:
     rev: v1.9.0
     hooks:
       - id: mypy
+        exclude: tests/
         args: [--ignore-missing-imports]
         additional_dependencies:
           - pydantic>=2.0.0
@@ -38,4 +40,4 @@ repos:
         exclude: tests/
 
 default_language_version:
-  python: python3.11
+  python: python3

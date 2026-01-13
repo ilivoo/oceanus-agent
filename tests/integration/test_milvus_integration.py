@@ -1,7 +1,6 @@
 """Integration tests for Milvus service."""
 
 import pytest
-
 from oceanus_agent.services.milvus_service import MilvusService
 
 
@@ -9,7 +8,9 @@ from oceanus_agent.services.milvus_service import MilvusService
 class TestMilvusIntegration:
     """Milvus Service 集成测试."""
 
-    async def test_milvus_collection_and_search(self, real_milvus_service: MilvusService):
+    async def test_milvus_collection_and_search(
+        self, real_milvus_service: MilvusService
+    ):
         """测试 Milvus 集合创建、数据插入和搜索功能."""
 
         # 1. 验证集合已创建
@@ -26,7 +27,7 @@ class TestMilvusIntegration:
             error_type="backpressure",
             error_pattern="High backpressure in <PATH>",
             root_cause="Skewed data distribution",
-            solution="Add more partitions"
+            solution="Add more partitions",
         )
 
         # 3. 搜索相似案例
@@ -34,8 +35,7 @@ class TestMilvusIntegration:
         # 但 MilvusClient.insert 默认会有一定的保证，或者我们可以稍微等待或强制刷新。
         # 简单起见，我们直接搜索。
         results = await real_milvus_service.search_similar_cases(
-            query_vector=vector,
-            limit=1
+            query_vector=vector, limit=1
         )
 
         assert len(results) > 0
@@ -52,14 +52,12 @@ class TestMilvusIntegration:
             vector=vector,
             title="Flink Performance Tuning",
             content="To tune performance, adjust memory settings...",
-            category="tuning"
+            category="tuning",
         )
 
         # 搜索
         results = await real_milvus_service.search_doc_snippets(
-            query_vector=vector,
-            category="tuning",
-            limit=1
+            query_vector=vector, category="tuning", limit=1
         )
 
         assert len(results) > 0

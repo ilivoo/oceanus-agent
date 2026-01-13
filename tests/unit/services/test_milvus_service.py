@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from oceanus_agent.config.settings import MilvusSettings
 from oceanus_agent.services.milvus_service import MilvusService
 
@@ -70,21 +69,25 @@ class TestMilvusService:
     async def test_search_similar_cases(self, milvus_service, mock_client):
         """Test searching similar cases."""
         # Mock search result
-        mock_client.search.return_value = [[
-            {
-                "entity": {
-                    "case_id": "case-1",
-                    "error_type": "checkpoint_failure",
-                    "error_pattern": "timeout",
-                    "root_cause": "network",
-                    "solution": "retry"
-                },
-                "distance": 0.85
-            }
-        ]]
+        mock_client.search.return_value = [
+            [
+                {
+                    "entity": {
+                        "case_id": "case-1",
+                        "error_type": "checkpoint_failure",
+                        "error_pattern": "timeout",
+                        "root_cause": "network",
+                        "solution": "retry",
+                    },
+                    "distance": 0.85,
+                }
+            ]
+        ]
 
         query_vector = [0.1] * 1536
-        results = await milvus_service.search_similar_cases(query_vector, error_type="checkpoint_failure")
+        results = await milvus_service.search_similar_cases(
+            query_vector, error_type="checkpoint_failure"
+        )
 
         assert len(results) == 1
         assert results[0]["case_id"] == "case-1"
@@ -100,21 +103,25 @@ class TestMilvusService:
     async def test_search_doc_snippets(self, milvus_service, mock_client):
         """Test searching document snippets."""
         # Mock search result
-        mock_client.search.return_value = [[
-            {
-                "entity": {
-                    "doc_id": "doc-1",
-                    "title": "Checkpoint Guide",
-                    "content": "How to tune checkpoints...",
-                    "doc_url": "http://docs.flink/checkpoints",
-                    "category": "checkpoint"
-                },
-                "distance": 0.9
-            }
-        ]]
+        mock_client.search.return_value = [
+            [
+                {
+                    "entity": {
+                        "doc_id": "doc-1",
+                        "title": "Checkpoint Guide",
+                        "content": "How to tune checkpoints...",
+                        "doc_url": "http://docs.flink/checkpoints",
+                        "category": "checkpoint",
+                    },
+                    "distance": 0.9,
+                }
+            ]
+        ]
 
         query_vector = [0.1] * 1536
-        results = await milvus_service.search_doc_snippets(query_vector, category="checkpoint")
+        results = await milvus_service.search_doc_snippets(
+            query_vector, category="checkpoint"
+        )
 
         assert len(results) == 1
         assert results[0]["doc_id"] == "doc-1"
@@ -136,7 +143,7 @@ class TestMilvusService:
             error_type="oom",
             error_pattern="OOM error",
             root_cause="Bad config",
-            solution="Fix config"
+            solution="Fix config",
         )
 
         mock_client.insert.assert_called_once()
@@ -154,7 +161,7 @@ class TestMilvusService:
             title="New Doc",
             content="Content",
             doc_url="http://url",
-            category="general"
+            category="general",
         )
 
         mock_client.insert.assert_called_once()
@@ -165,7 +172,9 @@ class TestMilvusService:
     def test_get_collection_stats(self, milvus_service, mock_client):
         """Test getting collection statistics."""
         # Mock describe_collection
-        mock_client.describe_collection.return_value = {"description": "Test Collection"}
+        mock_client.describe_collection.return_value = {
+            "description": "Test Collection"
+        }
 
         # Mock query for count
         mock_client.query.return_value = [{"count(*)": 100}]

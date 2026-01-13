@@ -73,10 +73,10 @@ jobs:
         env:
           NEW_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
         run: |
-          # Use sed to replace the image line. 
+          # Use sed to replace the image line.
           # Matches "image: *" and replaces with the new image
           sed -i "s|image: .*|image: $NEW_IMAGE|g" deploy/k8s/deployment.yaml
-          
+
           # Check if file changed
           if git diff --quiet deploy/k8s/deployment.yaml; then
             echo "No changes to deployment.yaml"

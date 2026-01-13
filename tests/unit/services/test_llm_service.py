@@ -3,7 +3,6 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from oceanus_agent.models.diagnosis import DiagnosisOutput, Priority
 from oceanus_agent.models.state import RetrievedContext
 from oceanus_agent.services.llm_service import LLMService

@@ -3,7 +3,6 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from oceanus_agent.config.settings import KnowledgeSettings
 from oceanus_agent.models.state import RetrievedCase, RetrievedDoc
 from oceanus_agent.services.llm_service import LLMService
@@ -43,13 +42,15 @@ class TestKnowledgeRetriever:
         return KnowledgeRetriever(mock_milvus_service, mock_llm_service, mock_settings)
 
     @pytest.mark.asyncio
-    async def test_retrieve_success(self, retriever, mock_milvus_service, mock_llm_service):
+    async def test_retrieve_success(
+        self, retriever, mock_milvus_service, mock_llm_service
+    ):
         """Test successful retrieval."""
         state = {
             "job_info": {
                 "job_id": "job-1",
                 "error_type": "checkpoint",
-                "error_message": "timeout"
+                "error_message": "timeout",
             }
         }
 
@@ -58,8 +59,12 @@ class TestKnowledgeRetriever:
 
         # Mock Milvus search
         mock_case = RetrievedCase(
-            case_id="c1", error_type="checkpoint", error_pattern="p",
-            root_cause="r", solution="s", similarity_score=0.9
+            case_id="c1",
+            error_type="checkpoint",
+            error_pattern="p",
+            root_cause="r",
+            solution="s",
+            similarity_score=0.9,
         )
         mock_doc = RetrievedDoc(
             doc_id="d1", title="t", content="c", similarity_score=0.8
@@ -93,7 +98,7 @@ class TestKnowledgeRetriever:
             "job_info": {
                 "job_id": "job-1",
                 "error_type": "checkpoint",
-                "error_message": "timeout"
+                "error_message": "timeout",
             }
         }
 

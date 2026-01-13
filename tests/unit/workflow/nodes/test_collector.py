@@ -3,7 +3,6 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from oceanus_agent.models.state import DiagnosisStatus
 from oceanus_agent.services.mysql_service import MySQLService
 from oceanus_agent.workflow.nodes.collector import JobCollector
@@ -27,11 +26,7 @@ class TestJobCollector:
     @pytest.mark.asyncio
     async def test_collect_job_found(self, collector, mock_mysql_service):
         """Test collecting a job when one is pending."""
-        job_info = {
-            "exception_id": 1,
-            "job_id": "job-123",
-            "error_message": "error"
-        }
+        job_info = {"exception_id": 1, "job_id": "job-123", "error_message": "error"}
         mock_mysql_service.get_pending_exception.return_value = job_info
 
         state = {}

@@ -25,7 +25,9 @@ class MilvusService:
             return self.client
 
         try:
-            self.client = MilvusClient(uri=self.settings.uri, token=self.settings.token_value)
+            self.client = MilvusClient(
+                uri=self.settings.uri, token=self.settings.token_value
+            )
             self._ensure_collections()
             return self.client
         except Exception as e:
@@ -42,7 +44,8 @@ class MilvusService:
             if not self.client.has_collection(self.settings.cases_collection):
                 self._create_cases_collection()
                 logger.info(
-                    "Created cases collection", collection=self.settings.cases_collection
+                    "Created cases collection",
+                    collection=self.settings.cases_collection,
                 )
 
             # Check and create docs collection

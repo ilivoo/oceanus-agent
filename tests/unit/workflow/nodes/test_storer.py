@@ -3,7 +3,6 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from oceanus_agent.models.state import DiagnosisStatus
 from oceanus_agent.services.mysql_service import MySQLService
 from oceanus_agent.workflow.nodes.storer import ResultStorer
@@ -29,13 +28,8 @@ class TestResultStorer:
     async def test_store_success(self, storer, mock_mysql_service):
         """Test storing successful diagnosis."""
         state = {
-            "job_info": {
-                "exception_id": 1,
-                "job_id": "job-1"
-            },
-            "diagnosis_result": {
-                "confidence": 0.9
-            }
+            "job_info": {"exception_id": 1, "job_id": "job-1"},
+            "diagnosis_result": {"confidence": 0.9},
         }
 
         new_state = await storer(state)
@@ -48,12 +42,9 @@ class TestResultStorer:
     async def test_store_failure(self, storer, mock_mysql_service):
         """Test storing failure when diagnosis is missing."""
         state = {
-            "job_info": {
-                "exception_id": 1,
-                "job_id": "job-1"
-            },
+            "job_info": {"exception_id": 1, "job_id": "job-1"},
             "diagnosis_result": None,
-            "error": "Diagnosis failed"
+            "error": "Diagnosis failed",
         }
 
         new_state = await storer(state)
@@ -69,11 +60,8 @@ class TestResultStorer:
     async def test_store_db_error(self, storer, mock_mysql_service):
         """Test handling DB error during storage."""
         state = {
-            "job_info": {
-                "exception_id": 1,
-                "job_id": "job-1"
-            },
-            "diagnosis_result": {"confidence": 0.9}
+            "job_info": {"exception_id": 1, "job_id": "job-1"},
+            "diagnosis_result": {"confidence": 0.9},
         }
 
         mock_mysql_service.update_diagnosis_result.side_effect = Exception("DB Error")

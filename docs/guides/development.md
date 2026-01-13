@@ -184,27 +184,39 @@ async def test_get_pending_exception(mysql_service):
 
 ## 6. 代码质量
 
-### 6.1 代码检查
+我们使用 pre-commit 钩子来自动执行代码质量检查。
+
+### 6.1 初始化
+
+在开始开发前，请安装 git hooks：
 
 ```bash
-# Ruff 检查
-ruff check src/
-
-# 自动修复
-ruff check --fix src/
-
-# 类型检查
-mypy src/
+# 安装 pre-commit 钩子
+pre-commit install
 ```
 
-### 6.2 格式化
+这样每次提交代码时，都会自动运行检查。
+
+### 6.2 手动运行
+
+你也可以手动运行检查：
 
 ```bash
-# 使用 Black
-black src/
+# 运行所有检查
+pre-commit run --all-files
+```
 
-# 使用 isort
-isort src/
+### 6.3 单独工具
+
+如果需要单独运行某个工具：
+
+```bash
+# Ruff 检查和自动修复
+ruff check --fix src/ scripts/ tests/
+ruff format src/ scripts/ tests/
+
+# 类型检查
+mypy src/ scripts/
 ```
 
 ## 7. 调试

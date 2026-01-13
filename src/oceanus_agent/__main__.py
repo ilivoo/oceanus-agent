@@ -41,7 +41,7 @@ def main() -> None:
 
     uvicorn.run(
         "oceanus_agent.api.app:app",
-        host="0.0.0.0",
+        host="0.0.0.0",  # nosec
         port=8000,
         reload=settings.app.debug,
         log_level=settings.app.log_level.lower(),

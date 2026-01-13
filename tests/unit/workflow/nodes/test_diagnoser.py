@@ -3,7 +3,6 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from oceanus_agent.models.state import DiagnosisStatus
 from oceanus_agent.services.llm_service import LLMService
 from oceanus_agent.workflow.nodes.diagnoser import LLMDiagnoser
@@ -29,11 +28,8 @@ class TestLLMDiagnoser:
     async def test_diagnose_success(self, diagnoser, mock_llm_service):
         """Test successful diagnosis."""
         state = {
-            "job_info": {
-                "job_id": "job-1",
-                "error_message": "timeout"
-            },
-            "retrieved_context": {}
+            "job_info": {"job_id": "job-1", "error_message": "timeout"},
+            "retrieved_context": {},
         }
 
         # Mock classify
@@ -44,7 +40,7 @@ class TestLLMDiagnoser:
             "root_cause": "network",
             "suggested_fix": "retry",
             "confidence": 0.9,
-            "priority": "high"
+            "priority": "high",
         }
         mock_llm_service.generate_diagnosis.return_value = diagnosis_result
 
@@ -59,11 +55,8 @@ class TestLLMDiagnoser:
     async def test_diagnose_retry_logic(self, diagnoser, mock_llm_service):
         """Test retry logic on failure."""
         state = {
-            "job_info": {
-                "job_id": "job-1",
-                "error_message": "error"
-            },
-            "retry_count": 0
+            "job_info": {"job_id": "job-1", "error_message": "error"},
+            "retry_count": 0,
         }
 
         mock_llm_service.classify_error.side_effect = Exception("LLM Error")
@@ -78,11 +71,8 @@ class TestLLMDiagnoser:
     async def test_diagnose_max_retries_exceeded(self, diagnoser, mock_llm_service):
         """Test failure after max retries."""
         state = {
-            "job_info": {
-                "job_id": "job-1",
-                "error_message": "error"
-            },
-            "retry_count": 2  # Max is 3, so next failure hits max
+            "job_info": {"job_id": "job-1", "error_message": "error"},
+            "retry_count": 2,  # Max is 3, so next failure hits max
         }
 
         mock_llm_service.classify_error.side_effect = Exception("LLM Error")

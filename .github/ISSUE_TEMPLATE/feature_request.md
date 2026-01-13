@@ -23,4 +23,3 @@ assignees: ''
 
 ## 4. 验收标准 (Acceptance Criteria)
 <!-- 怎么才算完成了？ -->
-

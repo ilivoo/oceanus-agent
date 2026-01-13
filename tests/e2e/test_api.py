@@ -1,9 +1,9 @@
 from fastapi.testclient import TestClient
-
 from oceanus_agent.api.app import app
 from oceanus_agent.config.settings import settings
 
 client = TestClient(app)
+
 
 def test_health_check():
     """Test the health check endpoint."""
@@ -13,6 +13,7 @@ def test_health_check():
     assert data["status"] == "healthy"
     assert data["version"] == "0.1.0"
     assert data["environment"] == settings.app.env
+
 
 def test_readiness_check_mocked(mocker):
     """Test readiness check with mocked DB."""
@@ -27,6 +28,7 @@ def test_readiness_check_mocked(mocker):
     response = client.get("/api/v1/ready")
     assert response.status_code == 200
     assert response.json() == {"status": "ready"}
+
 
 def test_readiness_check_failure(mocker):
     """Test readiness check failure."""

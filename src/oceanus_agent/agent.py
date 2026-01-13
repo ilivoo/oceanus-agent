@@ -11,6 +11,7 @@ from oceanus_agent.workflow.graph import DiagnosisWorkflow
 
 logger = structlog.get_logger()
 
+
 class DiagnosisAgent:
     """Main diagnosis agent application."""
 

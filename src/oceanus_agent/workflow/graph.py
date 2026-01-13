@@ -35,7 +35,7 @@ def should_continue_after_collect(state: DiagnosisState) -> str:
         return "handle_error"
 
     if state.get("job_info") is None:
-        return END
+        return cast(str, END)
 
     return "retrieve"
 
