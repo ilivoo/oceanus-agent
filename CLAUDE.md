@@ -194,7 +194,8 @@ pytest tests/ -v
     - 运行 `ruff` 代码风格检查。
     - 运行 `mypy` 类型检查。
     - 运行 `pytest` 单元测试。
-- **Release (`release.yml`)**: 创建 Git Tag 或发布 Release 时触发构建。
+- **Release (`semantic-release.yml`)**: 每月基于 Conventional Commits 自动发布版本 (Tag, Release, Changelog)。
+- **Docker (`release.yml`)**: 自动检测到 Release 发布后，构建并推送 Docker 镜像。
 - **Dependabot**: 自动检测并更新依赖 (`.github/dependabot.yml`)。
 
 ## 9. AI 驱动开发流程

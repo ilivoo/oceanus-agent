@@ -1,9 +1,8 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*' # 触发规则：推送 v 开头的 tag
+  release:
+    types: [published]
 
 env:
   REGISTRY: ghcr.io
@@ -11,23 +10,14 @@ env:
 
 jobs:
   release:
-    name: Create Release
+    name: Build & Publish Docker Image
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 需要权限创建 Release
-      packages: write # 需要权限推镜像
+      contents: write # Update deployment.yaml
+      packages: write # Push image
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # 获取完整历史以生成 Changelog
 
-      # 1. 自动生成 Changelog 并创建 GitHub Release
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          generate_release_notes: true
-          draft: false
-          prerelease: false
 
       # 2. 构建并发布 Release 版 Docker 镜像
       - name: Set up Docker Buildx
