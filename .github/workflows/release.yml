@@ -16,7 +16,7 @@ jobs:
       contents: write # Update deployment.yaml
       packages: write # Push image
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
 
       # 2. 构建并发布 Release 版 Docker 镜像
@@ -55,7 +55,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: main # Ensure we are updating the main branch
 
