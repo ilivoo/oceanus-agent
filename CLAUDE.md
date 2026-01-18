@@ -117,6 +117,61 @@
 - 引号: 双引号
 - Import 排序: isort 规则 (由 ruff 管理)
 
+### 代码生成格式规范（AI 必须遵循）
+
+生成或修改 Python 代码时，**必须严格遵循以下规范**，以避免后续格式化产生大量 diff：
+
+#### 基础格式
+- **行长度**：88 字符硬限制（超长字符串使用括号换行）
+- **缩进**：4 空格（禁止 Tab）
+- **引号**：双引号 `"` 用于字符串（单引号仅在嵌套时使用）
+- **尾随逗号**：多行列表/字典/参数必须添加尾随逗号
+
+#### Import 规范
+- **顺序**：标准库 → 第三方库 → 本地模块（每组间空一行）
+- **格式**：单行导入优先，超过 88 字符时使用括号多行
+- **禁止**：`from xxx import *`
+
+#### 代码示例
+
+```python
+# 正确示例
+from collections.abc import Sequence
+from typing import Any
+
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from oceanus_agent.models.diagnosis import DiagnosisResult
+
+
+class MyModel(BaseModel):
+    """模型文档字符串。"""
+
+    name: str = Field(..., description="名称")
+    tags: list[str] = Field(
+        default_factory=list,
+        description="标签列表",
+    )  # 尾随逗号
+
+
+async def process_data(
+    session: AsyncSession,
+    data: dict[str, Any],
+) -> DiagnosisResult:
+    """处理数据。"""
+    result = await session.execute(...)
+    return DiagnosisResult(...)
+```
+
+#### 空行规范
+- 顶层函数/类之间：2 个空行
+- 类内方法之间：1 个空行
+- 逻辑块之间：1 个空行（可选）
+
+#### 读取现有代码
+生成代码前，**必须先阅读**目标文件或同目录其他文件，模仿现有代码风格。
+
 ### 代码风格
 *   **数据模型**: **强制使用 Pydantic v2**。所有配置、API 交互、内部数据流转必须使用 Pydantic Model，禁止使用裸字典。
 *   **数据库交互**: 必须使用 `sqlalchemy.ext.asyncio` 配合 `aiomysql` 进行全异步操作。
@@ -194,5 +249,158 @@ pytest tests/ -v
     - 运行 `ruff` 代码风格检查。
     - 运行 `mypy` 类型检查。
     - 运行 `pytest` 单元测试。
-- **Release (`release.yml`)**: 创建 Git Tag 或发布 Release 时触发构建。
+- **Release (`semantic-release.yml`)**: 每月基于 Conventional Commits 自动发布版本 (Tag, Release, Changelog)。
+- **Docker (`release.yml`)**: 自动检测到 Release 发布后，构建并推送 Docker 镜像。
 - **Dependabot**: 自动检测并更新依赖 (`.github/dependabot.yml`)。
+
+## 9. AI 驱动开发流程
+
+本项目采用 AI 驱动的文档驱动开发 (AI-DDD) 流程，以下是 AI 助手参与开发的标准流程。
+
+### 9.1 Issue 处理流程
+
+```text
+新 Issue 创建
+    |
+    v
++------------------+
+| AI 自动分析       | <- 解析 Issue 内容，评估复杂度
++--------+---------+
+         |
+         v
+    +------------+
+    | 需要设计？  |
+    +-----+------+
+          |
+    +-----+-----+
+    |           |
+    v Yes       v No
+生成设计文档   直接实现
+    |           |
+    v           |
+设计评审 <------+
+    |
+    v
+代码实现
+    |
+    v
+AI Code Review (CodeRabbit)
+    |
+    v
+人工最终确认
+    |
+    v
+合并到 main
+```
+
+### 9.2 设计文档要求
+
+对于中等以上复杂度的功能，必须先创建设计文档:
+
+| 复杂度 | 代码行数估计 | 是否需要设计文档 |
+|--------|--------------|------------------|
+| 低     | < 50 行      | 否 |
+| 中     | 50-200 行    | 推荐 |
+| 高     | > 200 行     | 必须 |
+
+**设计文档位置**: `docs/design/[feature-name].md`
+**设计模板**: `docs/templates/design-template.md`
+
+### 9.3 架构决策记录 (ADR)
+
+涉及以下情况时，必须创建 ADR:
+
+- 引入新的核心依赖
+- 变更系统架构
+- 重大技术选型
+- 打破现有约定
+
+**ADR 位置**: `docs/design/adr/NNN-title.md`
+**ADR 模板**: `docs/design/adr/template.md`
+
+### 9.4 Claude 自定义命令
+
+项目提供以下自定义命令加速开发:
+
+| 命令 | 说明 | 示例 |
+|------|------|------|
+| `/design` | 生成设计文档 | `/design 添加 Kafka 消息消费` |
+| `/review` | 代码审查 | `/review --staged` |
+| `/diagnose` | 问题诊断 | `/diagnose MySQL 连接超时` |
+
+命令定义位于 `.claude/commands/`。
+
+### 9.5 知识库结构
+
+```text
+.claude/
+├── commands/           # 自定义命令
+├── knowledge/          # 项目知识库
+|   ├── architecture.md # 架构知识
+|   ├── patterns.md     # 代码模式
+|   ├── troubleshooting.md # 故障排除
+|   └── conventions.md  # 约定规范
+└── memory/             # 项目记忆
+    └── decisions.md    # 历史决策
+```
+
+**重要**: 在进行开发前，请阅读 `.claude/knowledge/` 中的相关文档。
+
+---
+
+## 10. Code Review 集成
+
+### 10.1 CodeRabbit 自动审查
+
+本项目集成 CodeRabbit 进行自动化代码审查。配置文件: `.coderabbit.yaml`
+
+**审查重点**:
+
+- 代码质量和最佳实践
+- 安全漏洞检测
+- 性能问题识别
+- 文档完整性
+
+**与 CodeRabbit 交互**:
+
+```text
+# 在 PR 评论中
+@coderabbitai review          # 请求审查
+@coderabbitai summary         # 生成变更摘要
+@coderabbitai resolve         # 标记问题已解决
+```
+
+### 10.2 人工审查清单
+
+即使 AI 审查通过，人工审查仍需检查:
+
+- [ ] 设计是否符合项目架构
+- [ ] 是否有潜在的安全风险
+- [ ] 是否影响系统稳定性
+- [ ] 是否需要更新文档
+
+---
+
+## 11. PR 自动化
+
+### 11.1 自动生成的内容
+
+PR 创建时会自动添加:
+
+- 变更统计 (文件数、代码行数)
+- Commit 列表
+- 变更文件分类
+
+### 11.2 自动标签
+
+基于变更文件自动添加标签:
+
+| 路径模式 | 标签 |
+|----------|------|
+| `workflow/**` | `area/workflow` |
+| `services/**` | `area/services` |
+| `api/**` | `area/api` |
+| `tests/**` | `area/tests` |
+| `**/*.md` | `type/documentation` |
+
+配置文件: `.github/labeler.yml`
