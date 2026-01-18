@@ -32,7 +32,7 @@ jobs:
                 .split('\n')
                 .filter(f => f);
             } catch (e) {
-              console.log('Error getting changed files:', e.message);
+              core.setFailed(`Error getting changed files: ${e.message}`);
               return;
             }
 
@@ -69,34 +69,48 @@ jobs:
 
             for (const srcFile of sourceFiles) {
               // Infer test file path from source file path
-              // src/oceanus_agent/services/xxx.py -> tests/unit/services/test_xxx.py
-              const match = srcFile.match(/^src\/oceanus_agent\/(.+)\/([^/]+)\.py$/);
-              if (match) {
-                const [, subPath, moduleName] = match;
-                const expectedTestPath = `tests/unit/${subPath}/test_${moduleName}.py`;
+              // Case 1: src/oceanus_agent/services/xxx.py -> tests/unit/services/test_xxx.py
+              // Case 2: src/oceanus_agent/xxx.py -> tests/unit/test_xxx.py (top-level module)
+              const subDirMatch = srcFile.match(/^src\/oceanus_agent\/(.+)\/([^/]+)\.py$/);
+              const topLevelMatch = srcFile.match(/^src\/oceanus_agent\/([^/]+)\.py$/);
 
-                // Check if test file is modified in PR
-                const hasTestChange = testFiles.some(t =>
-                  t.includes(`test_${moduleName}.py`) || t.includes(subPath)
-                );
+              let expectedTestPath;
+              let moduleName;
+              let subPath;
 
-                // Check if test file exists in repo
-                let testExists = false;
-                try {
-                  execSync(`git ls-files --error-unmatch "${expectedTestPath}" 2>/dev/null`, { stdio: 'pipe' });
-                  testExists = true;
-                } catch (e) {
-                  testExists = false;
-                }
+              if (subDirMatch) {
+                [, subPath, moduleName] = subDirMatch;
+                expectedTestPath = `tests/unit/${subPath}/test_${moduleName}.py`;
+              } else if (topLevelMatch) {
+                [, moduleName] = topLevelMatch;
+                subPath = '';
+                expectedTestPath = `tests/unit/test_${moduleName}.py`;
+              } else {
+                console.log(`Skipping unrecognized path format: ${srcFile}`);
+                continue;
+              }
 
-                console.log(`Source: ${srcFile}, Expected test: ${expectedTestPath}, Exists: ${testExists}, Changed: ${hasTestChange}`);
+              // Check if test file is modified in PR
+              const hasTestChange = testFiles.some(t =>
+                t.includes(`test_${moduleName}.py`) || (subPath && t.includes(subPath))
+              );
 
-                if (!testExists && !hasTestChange) {
-                  missingTests.push({
-                    source: srcFile,
-                    expectedTest: expectedTestPath,
-                  });
-                }
+              // Check if test file exists in repo
+              let testExists = false;
+              try {
+                execSync(`git ls-files --error-unmatch "${expectedTestPath}" 2>/dev/null`, { stdio: 'pipe' });
+                testExists = true;
+              } catch (e) {
+                testExists = false;
+              }
+
+              console.log(`Source: ${srcFile}, Expected test: ${expectedTestPath}, Exists: ${testExists}, Changed: ${hasTestChange}`);
+
+              if (!testExists && !hasTestChange) {
+                missingTests.push({
+                  source: srcFile,
+                  expectedTest: expectedTestPath,
+                });
               }
             }
 

@@ -154,15 +154,25 @@ class TestBugFixIssueXXX:
 import pytest
 
 from oceanus_agent.config.settings import settings
+# TODO: 根据实际测试的服务替换下面的导入
+# from oceanus_agent.services.xxx_service import XxxService as RealService
 
 
 @pytest.fixture(scope="module")
 async def real_service():
-    """Create real service with test configuration."""
-    service = RealService(settings)
-    await service.connect()
-    yield service
-    await service.disconnect()
+    """Create real service with test configuration.
+
+    注意：请将 RealService 替换为实际测试的服务类，例如：
+    - MilvusService
+    - MySQLService
+    - LLMService
+    """
+    # TODO: 替换为实际的服务类
+    # service = RealService(settings)
+    # await service.connect()
+    # yield service
+    # await service.disconnect()
+    raise NotImplementedError("请替换 RealService 为实际的服务类")
 
 
 class TestFeatureIntegration:

@@ -123,7 +123,7 @@ git checkout -b feat/xxx  # 或 fix/xxx
 
 # 8. 最终验证
 ./.venv/bin/pre-commit run --all-files
-./.venv/bin/pytest tests/unit -v --cov --cov-fail-under=70
+./.venv/bin/pytest tests/unit -v --cov=oceanus_agent --cov-fail-under=70
 ```
 
 ### AI 编码规范
@@ -143,7 +143,7 @@ git checkout -b feat/xxx  # 或 fix/xxx
 - [ ] **测试覆盖**: 包含正常路径、边界条件、错误处理
 - [ ] **Red 确认**: 测试在实现前确实失败
 - [ ] **Green 确认**: 实现后所有测试通过
-- [ ] **覆盖率达标**: 新代码覆盖率 >= 80%
+- [ ] **覆盖率达标**: 整体覆盖率 >= 70%（CI 强制），新代码推荐 >= 80%
 - [ ] pre-commit 检查通过
 
 ---
