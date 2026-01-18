@@ -117,6 +117,61 @@
 - 引号: 双引号
 - Import 排序: isort 规则 (由 ruff 管理)
 
+### 代码生成格式规范（AI 必须遵循）
+
+生成或修改 Python 代码时，**必须严格遵循以下规范**，以避免后续格式化产生大量 diff：
+
+#### 基础格式
+- **行长度**：88 字符硬限制（超长字符串使用括号换行）
+- **缩进**：4 空格（禁止 Tab）
+- **引号**：双引号 `"` 用于字符串（单引号仅在嵌套时使用）
+- **尾随逗号**：多行列表/字典/参数必须添加尾随逗号
+
+#### Import 规范
+- **顺序**：标准库 → 第三方库 → 本地模块（每组间空一行）
+- **格式**：单行导入优先，超过 88 字符时使用括号多行
+- **禁止**：`from xxx import *`
+
+#### 代码示例
+
+```python
+# 正确示例
+from collections.abc import Sequence
+from typing import Any
+
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from oceanus_agent.models.diagnosis import DiagnosisResult
+
+
+class MyModel(BaseModel):
+    """模型文档字符串。"""
+
+    name: str = Field(..., description="名称")
+    tags: list[str] = Field(
+        default_factory=list,
+        description="标签列表",
+    )  # 尾随逗号
+
+
+async def process_data(
+    session: AsyncSession,
+    data: dict[str, Any],
+) -> DiagnosisResult:
+    """处理数据。"""
+    result = await session.execute(...)
+    return DiagnosisResult(...)
+```
+
+#### 空行规范
+- 顶层函数/类之间：2 个空行
+- 类内方法之间：1 个空行
+- 逻辑块之间：1 个空行（可选）
+
+#### 读取现有代码
+生成代码前，**必须先阅读**目标文件或同目录其他文件，模仿现有代码风格。
+
 ### 代码风格
 *   **数据模型**: **强制使用 Pydantic v2**。所有配置、API 交互、内部数据流转必须使用 Pydantic Model，禁止使用裸字典。
 *   **数据库交互**: 必须使用 `sqlalchemy.ext.asyncio` 配合 `aiomysql` 进行全异步操作。
