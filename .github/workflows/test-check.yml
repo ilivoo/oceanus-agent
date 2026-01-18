@@ -1,0 +1,168 @@
+name: TDD Test File Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-test-files:
+    name: Check Test Files Exist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for test files in PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('child_process');
+
+            // Get changed files in PR
+            const base = context.payload.pull_request.base.sha;
+            const head = context.payload.pull_request.head.sha;
+
+            let changedFiles = [];
+            try {
+              changedFiles = execSync(`git diff --name-only ${base}...${head}`)
+                .toString()
+                .trim()
+                .split('\n')
+                .filter(f => f);
+            } catch (e) {
+              core.setFailed(`Error getting changed files: ${e.message}`);
+              return;
+            }
+
+            console.log('Changed files:', changedFiles);
+
+            // Identify source code files (exclude test files, docs, configs)
+            const sourceFilePattern = /^src\/oceanus_agent\/.*\.py$/;
+            const excludePatterns = [
+              /\/__init__\.py$/,
+              /test_.*\.py$/,
+              /conftest\.py$/,
+            ];
+
+            const sourceFiles = changedFiles.filter(f => {
+              const isSource = sourceFilePattern.test(f);
+              const isExcluded = excludePatterns.some(p => p.test(f));
+              return isSource && !isExcluded;
+            });
+
+            console.log('Source files:', sourceFiles);
+
+            // Skip if no source code changes
+            if (sourceFiles.length === 0) {
+              console.log('No source code changes detected, skipping test check');
+              return;
+            }
+
+            // Check for corresponding test file changes
+            const testFiles = changedFiles.filter(f => f.startsWith('tests/') && f.endsWith('.py'));
+            console.log('Test files in PR:', testFiles);
+
+            // Check if new/modified source files have corresponding tests
+            const missingTests = [];
+
+            for (const srcFile of sourceFiles) {
+              // Infer test file path from source file path
+              // Case 1: src/oceanus_agent/services/xxx.py -> tests/unit/services/test_xxx.py
+              // Case 2: src/oceanus_agent/xxx.py -> tests/unit/test_xxx.py (top-level module)
+              const subDirMatch = srcFile.match(/^src\/oceanus_agent\/(.+)\/([^/]+)\.py$/);
+              const topLevelMatch = srcFile.match(/^src\/oceanus_agent\/([^/]+)\.py$/);
+
+              let expectedTestPath;
+              let moduleName;
+              let subPath;
+
+              if (subDirMatch) {
+                [, subPath, moduleName] = subDirMatch;
+                expectedTestPath = `tests/unit/${subPath}/test_${moduleName}.py`;
+              } else if (topLevelMatch) {
+                [, moduleName] = topLevelMatch;
+                subPath = '';
+                expectedTestPath = `tests/unit/test_${moduleName}.py`;
+              } else {
+                console.log(`Skipping unrecognized path format: ${srcFile}`);
+                continue;
+              }
+
+              // Check if test file is modified in PR
+              const hasTestChange = testFiles.some(t =>
+                t.includes(`test_${moduleName}.py`) || (subPath && t.includes(subPath))
+              );
+
+              // Check if test file exists in repo
+              let testExists = false;
+              try {
+                execSync(`git ls-files --error-unmatch "${expectedTestPath}" 2>/dev/null`, { stdio: 'pipe' });
+                testExists = true;
+              } catch (e) {
+                testExists = false;
+              }
+
+              console.log(`Source: ${srcFile}, Expected test: ${expectedTestPath}, Exists: ${testExists}, Changed: ${hasTestChange}`);
+
+              if (!testExists && !hasTestChange) {
+                missingTests.push({
+                  source: srcFile,
+                  expectedTest: expectedTestPath,
+                });
+              }
+            }
+
+            // Generate check result
+            if (missingTests.length > 0) {
+              // Build markdown table rows
+              const tableRows = missingTests.map(m =>
+                '| `' + m.source + '` | `' + m.expectedTest + '` |'
+              ).join('\n');
+
+              const firstSource = missingTests[0].source;
+              const testPaths = missingTests.map(m => m.expectedTest).join(' ');
+
+              const warningMessage = [
+                '## TDD Check Warning',
+                '',
+                'The following source files are missing corresponding test files:',
+                '',
+                '| Source File | Expected Test File |',
+                '|-------------|-------------------|',
+                tableRows,
+                '',
+                '### Suggested Actions',
+                '',
+                '1. Use `/test` command to generate test skeleton:',
+                '   ```',
+                '   /test ' + firstSource,
+                '   ```',
+                '',
+                '2. Write test cases covering:',
+                '   - Happy path',
+                '   - Edge cases',
+                '   - Error handling',
+                '',
+                '3. Run tests to confirm they pass:',
+                '   ```bash',
+                '   ./.venv/bin/pytest ' + testPaths + ' -v',
+                '   ```',
+                '',
+                '> See: [TDD Guide](docs/guides/tdd.md)',
+              ].join('\n');
+
+              // Add PR comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: warningMessage,
+              });
+
+              // Fail the check
+              core.setFailed('Missing test files for new source code. See PR comment for details.');
+            } else {
+              console.log('All source files have corresponding tests');
+            }

@@ -63,3 +63,17 @@
       - any-glob-to-any-file:
           - "pyproject.toml"
           - "requirements*.txt"
+
+# TDD related - source without tests
+"needs-tests":
+  - all:
+      - changed-files:
+          - any-glob-to-any-file: "src/oceanus_agent/**/*.py"
+      - changed-files:
+          - all-globs-to-all-files:
+              - "!tests/**/*.py"
+
+# TDD compliant - has test changes
+"tdd-compliant":
+  - changed-files:
+      - any-glob-to-any-file: "tests/**/*.py"

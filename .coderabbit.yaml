@@ -58,6 +58,14 @@ reviews:
 
   # 路径指令 (针对特定路径的审查规则)
   path_instructions:
+    - path: "src/oceanus_agent/**/*.py"
+      instructions: |
+        这是核心源代码。审查时请特别关注 TDD 合规性:
+        1. 检查是否有对应的测试文件 (tests/unit/ 目录)
+        2. 如果是新增模块，检查 tests/ 目录下是否有对应的 test_*.py
+        3. 新增的公开方法是否有测试覆盖
+        4. 如果缺少测试，请在审查意见中指出
+
     - path: "src/oceanus_agent/workflow/**"
       instructions: |
         这是 LangGraph 工作流核心代码。审查时请关注:
@@ -100,11 +108,13 @@ reviews:
 
     - path: "tests/**"
       instructions: |
-        这是测试代码。审查时请关注:
-        1. 测试用例是否覆盖边界情况
-        2. Mock 是否正确设置
-        3. 断言是否足够具体
-        4. 测试命名是否清晰描述测试意图
+        这是测试代码。审查时请关注 TDD 规范:
+        1. 测试命名是否遵循 `test_<method>_<scenario>_<expected>()` 规范
+        2. 测试用例是否覆盖边界情况
+        3. Mock 是否正确设置
+        4. 断言是否足够具体
+        5. 是否包含正常路径、边界条件、错误处理三类测试
+        6. 使用 Arrange-Act-Assert 模式组织测试
 
     - path: "**/*.md"
       instructions: |
