@@ -122,7 +122,7 @@
 
 | 设置项 | 说明 | 状态 |
 |--------|------|------|
-| Branch Protection Rules | 保护 `main` 分支，强制 PR、CI 通过、Code Review | ⚠️ 需确认 |
+| Branch Protection Rules | 保护 `main` 分支，强制 PR、CI 通过、Code Review | ✅ [配置指南](./branch-protection.md) |
 | Secrets 配置 | `CODECOV_TOKEN` 等密钥 | ⚠️ 需确认 |
 | GitHub Pages | 如需发布文档站点 | ❌ 未配置 |
 | Environments | 配置 staging/production 环境保护 | ❌ 未配置 |
@@ -179,7 +179,7 @@
 ### 优先级高
 
 1. **确认 GitHub 仓库设置**
-   - 配置 Branch Protection Rules
+   - ~~配置 Branch Protection Rules~~ ✅ 已完成，参见 [配置指南](./branch-protection.md)
    - 验证 Secrets（`CODECOV_TOKEN` 等）
 
 2. **添加 GitHub Copilot 配置**（可选）
