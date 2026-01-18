@@ -56,3 +56,17 @@
 
 ...
 ```
+
+## 关联知识库
+
+| 知识库 | 用途 |
+|--------|------|
+| [conventions.md](../knowledge/conventions.md) | 命名规范、代码风格检查 |
+| [patterns.md](../knowledge/patterns.md) | 最佳实践、代码模式参考 |
+| [architecture.md](../knowledge/architecture.md) | 架构约束检查 |
+
+## 相关文档
+
+- [命令总览](README.md)
+- [分支保护规则](../../docs/guides/branch-protection.md)
+- [端到端示例](../../docs/guides/workflow-example.md)

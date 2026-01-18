@@ -227,9 +227,17 @@ class TestFeatureIntegration:
 6. 重构优化                 # 在测试保护下重构
 ```
 
-## 关联知识
+## 关联知识库
 
-- 测试约定: `.claude/knowledge/conventions.md` (第 118-159 行)
-- 代码模式: `.claude/knowledge/patterns.md`
-- 现有 fixtures: `tests/conftest.py`
-- TDD 指南: `docs/guides/tdd.md`
+| 知识库 | 用途 |
+|--------|------|
+| [conventions.md](../knowledge/conventions.md) | 测试命名规范 (第 118-159 行) |
+| [patterns.md](../knowledge/patterns.md) | Mock 模式、异步测试模式 |
+| [architecture.md](../knowledge/architecture.md) | 了解模块依赖关系 |
+
+## 相关文档
+
+- [命令总览](README.md)
+- [TDD 开发指南](../../docs/guides/tdd.md)
+- [现有 fixtures](../../tests/conftest.py)
+- [端到端示例](../../docs/guides/workflow-example.md)
