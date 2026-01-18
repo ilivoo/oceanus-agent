@@ -1,0 +1,132 @@
+# CodeRabbit Configuration
+# https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: "zh-CN"
+
+tone_instructions: |
+  请使用中文进行代码审查。保持专业、友好的语气。
+  对于问题，提供具体的修复建议和代码示例。
+
+early_access: false
+
+enable_free_tier: true
+
+reviews:
+  # 审查配置
+  profile: "chill" # 审查强度: chill, default, assertive
+
+  # 启用的审查类型
+  request_changes_workflow: true
+  high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
+
+  # 诗歌模式 (关闭以节省 token)
+  poem: false
+
+  # 审查提示
+  review_status: true
+
+  # 自动审查配置
+  auto_review:
+    enabled: true
+    # 忽略特定文件类型
+    ignore_title_keywords:
+      - "WIP"
+      - "DO NOT MERGE"
+      - "Draft"
+    drafts: false
+
+    # 基础分支
+    base_branches:
+      - main
+      - develop
+
+  # 路径过滤
+  path_filters:
+    # 忽略的路径
+    - "!**/*.lock"
+    - "!**/package-lock.json"
+    - "!**/*.min.js"
+    - "!**/*.min.css"
+    - "!**/node_modules/**"
+    - "!**/.venv/**"
+    - "!**/coverage/**"
+    - "!**/*.pyc"
+    - "!**/__pycache__/**"
+    - "!.coverage"
+    - "!*.xml"
+
+  # 路径指令 (针对特定路径的审查规则)
+  path_instructions:
+    - path: "src/oceanus_agent/workflow/**"
+      instructions: |
+        这是 LangGraph 工作流核心代码。审查时请关注:
+        1. 状态管理是否正确
+        2. 错误处理是否完善
+        3. 是否有潜在的死循环或状态泄漏
+        4. 重试逻辑是否合理
+
+    - path: "src/oceanus_agent/services/**"
+      instructions: |
+        这是外部服务集成层。审查时请关注:
+        1. 异步操作是否正确使用 await
+        2. 连接资源是否正确释放
+        3. 错误处理是否包含重试机制
+        4. 是否有敏感信息泄露风险
+
+    - path: "src/oceanus_agent/models/**"
+      instructions: |
+        这是 Pydantic 数据模型。审查时请关注:
+        1. 字段类型是否正确
+        2. 验证规则是否完善
+        3. 是否有必要的 Field 描述
+        4. 与数据库 schema 是否一致
+
+    - path: "src/oceanus_agent/api/**"
+      instructions: |
+        这是 FastAPI 路由层。审查时请关注:
+        1. API 路径命名是否规范 (RESTful)
+        2. 请求/响应模型是否完整
+        3. 错误处理是否返回正确的 HTTP 状态码
+        4. 是否有适当的认证/授权检查
+
+    - path: "src/oceanus_agent/config/**"
+      instructions: |
+        这是配置代码。审查时请关注:
+        1. 敏感配置是否从环境变量读取
+        2. 是否有合理的默认值
+        3. Prompt 模板是否清晰、可维护
+        4. 配置变更是否需要更新 .env.example
+
+    - path: "tests/**"
+      instructions: |
+        这是测试代码。审查时请关注:
+        1. 测试用例是否覆盖边界情况
+        2. Mock 是否正确设置
+        3. 断言是否足够具体
+        4. 测试命名是否清晰描述测试意图
+
+    - path: "**/*.md"
+      instructions: |
+        这是文档文件。审查时请关注:
+        1. 内容是否准确、最新
+        2. 格式是否正确 (Markdown 语法)
+        3. 是否有拼写或语法错误
+        4. 代码示例是否可运行
+
+chat:
+  # 允许的聊天命令
+  auto_reply: true
+
+# 知识库配置 (用于理解项目上下文)
+knowledge_base:
+  # 项目文档
+  opt_out: false
+  learnings:
+    scope: auto
+  issues:
+    scope: auto
+  jira:
+    project_keys: []
+  linear:
+    team_keys: []

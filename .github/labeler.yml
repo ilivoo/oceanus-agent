@@ -1,0 +1,65 @@
+# PR Auto-labeling Rules
+# Labels are automatically added based on changed files
+
+# Workflow related
+"area/workflow":
+  - changed-files:
+      - any-glob-to-any-file: "src/oceanus_agent/workflow/**/*"
+
+# Services layer
+"area/services":
+  - changed-files:
+      - any-glob-to-any-file: "src/oceanus_agent/services/**/*"
+
+# API
+"area/api":
+  - changed-files:
+      - any-glob-to-any-file: "src/oceanus_agent/api/**/*"
+
+# Configuration
+"area/config":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/oceanus_agent/config/**/*"
+          - "pyproject.toml"
+          - ".pre-commit-config.yaml"
+          - ".editorconfig"
+
+# Models / Data structures
+"area/models":
+  - changed-files:
+      - any-glob-to-any-file: "src/oceanus_agent/models/**/*"
+
+# Tests
+"area/tests":
+  - changed-files:
+      - any-glob-to-any-file: "tests/**/*"
+
+# Documentation
+"type/documentation":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - "docs/**/*"
+
+# CI/CD
+"area/ci":
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**/*"
+          - "Makefile"
+
+# Docker / Deployment
+"area/deployment":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "deploy/**/*"
+          - "Dockerfile"
+          - "docker-compose*.yml"
+
+# Dependencies
+"type/dependencies":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "pyproject.toml"
+          - "requirements*.txt"
