@@ -136,12 +136,12 @@ gh api repos/{owner}/{repo}/branches/develop/protection \
 
 ### Q: 如何允许特定用户绕过？
 
-**A**: 在保护规则中配置 "Restrict who can push to matching branches"，添加允许绕过的用户或团队。
+**A**: 在保护规则中启用 "Allow specified actors to bypass required pull requests"，将允许绕过的用户、团队或 GitHub App 添加到列表中。如需进一步限制只有特定用户可以推送，可结合 "Restrict who can push to matching branches" 一起配置。
 
 ---
 
 ## 相关文档
 
 - [GitHub 官方文档：About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)
-- [项目 CI 配置](.github/workflows/ci.yml)
+- [项目 CI 配置](../../.github/workflows/ci.yml)
 - [AI 集成指南](./ai-integration.md)
