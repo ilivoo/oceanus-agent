@@ -17,10 +17,10 @@ Branch Protection Rules 用于保护重要分支（如 `main`），强制执行�
 
 | 检查名称 | 说明 | 必选 |
 |----------|------|------|
-| `quality` | 代码质量检查 (pre-commit, ruff, mypy) | ✅ |
-| `test` | 单元测试 (pytest) | ✅ |
-| `security` | 安全扫描 (Bandit) | ✅ |
-| `build` | Docker 镜像构建 | ✅ |
+| `Code Quality (pre-commit)` | 代码质量检查 (pre-commit, ruff, mypy) | ✅ |
+| `Unit Tests` | 单元测试 (pytest) | ✅ |
+| `Security Scan` | 安全扫描 (Bandit) | ✅ |
+| `Build Docker Image` | Docker 镜像构建 | ✅ |
 
 ## 3. 配置步骤
 
@@ -49,10 +49,10 @@ Branch Protection Rules 用于保护重要分支（如 `main`），强制执行�
 - [x] **Require status checks to pass before merging**
   - [x] Require branches to be up to date before merging
   - 添加必选检查：
-    - `quality`
-    - `test`
-    - `security`
-    - `build`
+    - `Code Quality (pre-commit)`
+    - `Unit Tests`
+    - `Security Scan`
+    - `Build Docker Image`
 
 - [x] **Require conversation resolution before merging**
 
@@ -78,7 +78,7 @@ gh auth login
 gh api repos/{owner}/{repo}/branches/main/protection \
   --method PUT \
   --header "Accept: application/vnd.github+json" \
-  --field required_status_checks='{"strict":true,"contexts":["quality","test","security","build"]}' \
+  --field required_status_checks='{"strict":true,"contexts":["Code Quality (pre-commit)","Unit Tests","Security Scan","Build Docker Image"]}' \
   --field enforce_admins=true \
   --field required_pull_request_reviews='{"dismissal_restrictions":{},"dismiss_stale_reviews":true,"require_code_owner_reviews":true,"required_approving_review_count":1}' \
   --field restrictions=null \
@@ -111,7 +111,7 @@ gh api repos/{owner}/{repo}/branches/main/protection
 gh api repos/{owner}/{repo}/branches/develop/protection \
   --method PUT \
   --header "Accept: application/vnd.github+json" \
-  --field required_status_checks='{"strict":true,"contexts":["quality","test"]}' \
+  --field required_status_checks='{"strict":true,"contexts":["Code Quality (pre-commit)","Unit Tests"]}' \
   --field required_pull_request_reviews='{"required_approving_review_count":1}' \
   --field allow_force_pushes=false \
   --field allow_deletions=false
