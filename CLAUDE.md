@@ -187,6 +187,73 @@ async def process_data(
 *   **单元测试**: 位于 `tests/unit/`，不得依赖外部服务，使用 `unittest.mock` 进行模拟。
 *   **集成测试**: 位于 `tests/integration/`，依赖 Docker 环境 (MySQL/Milvus)。
 
+### TDD 开发规范（强制要求）
+
+> **核心原则**: 所有新功能必须先写测试，后写代码。不遵循 TDD 的 PR 将被 CI 拒绝合并。
+
+#### TDD 工作流程
+
+```text
+┌─────────┐    ┌─────────┐    ┌─────────┐
+│ 1. Red  │ -> │ 2.Green │ -> │3.Refactor│
+│ 写测试  │    │  写代码  │    │  重构    │
+└─────────┘    └─────────┘    └─────────┘
+     ^                              |
+     └──────────────────────────────┘
+```
+
+1. **Red**: 编写测试用例，运行测试确认失败（因功能未实现）
+2. **Green**: 编写最小实现代码，让测试通过
+3. **Refactor**: 在测试保护下优化代码质量
+
+#### 测试优先原则
+
+| 场景 | 要求 |
+|------|------|
+| 新增功能 | 必须先创建测试文件 |
+| Bug 修复 | 必须先编写复现 Bug 的测试 |
+| 重构 | 必须确保现有测试覆盖 |
+
+#### 使用 /test 命令
+
+```bash
+# 为新模块生成测试骨架
+/test src/oceanus_agent/services/new_service.py
+
+# 为指定功能生成测试
+/test 添加 Kafka 消费者健康检查功能
+
+# 为 Bug 修复生成测试
+/test fix: MySQL 连接超时问题 --type=bug
+```
+
+#### 测试命名规范
+
+```python
+def test_<method>_<scenario>_<expected>():
+    """测试 [方法] 在 [场景] 时应该 [预期结果]."""
+
+# 示例
+def test_get_pending_exception_when_no_pending_returns_none(): ...
+def test_diagnose_with_invalid_input_raises_validation_error(): ...
+```
+
+#### 覆盖率要求
+
+| 范围 | 最低要求 |
+|------|----------|
+| 整体项目 | 70% |
+| 新增代码 | 80% |
+
+#### 禁止行为
+
+- 在没有对应测试的情况下提交新功能代码
+- 使用 `--no-verify` 跳过测试检查
+- 删除或注释掉失败的测试
+- 提交覆盖率低于 70% 的代码
+
+**详细指南**: `docs/guides/tdd.md`
+
 ## 6. 常用命令
 
 ```bash
@@ -325,6 +392,7 @@ AI Code Review (CodeRabbit)
 | 命令 | 说明 | 示例 |
 |------|------|------|
 | `/design` | 生成设计文档 | `/design 添加 Kafka 消息消费` |
+| `/test` | 生成测试骨架 (TDD) | `/test src/oceanus_agent/services/xxx.py` |
 | `/review` | 代码审查 | `/review --staged` |
 | `/diagnose` | 问题诊断 | `/diagnose MySQL 连接超时` |
 
