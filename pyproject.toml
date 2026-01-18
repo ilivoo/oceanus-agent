@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oceanus-agent"
-version = "0.1.0"
+version = "1.1.0"
 description = "Flink Job Exception Diagnosis Agent System"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -20,7 +20,6 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-
 dependencies = [
     "langgraph>=0.2.0",
     "langchain>=0.3.0",
@@ -39,6 +38,13 @@ dependencies = [
     "structlog>=24.1.0",
     "tenacity>=8.3.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/ilivoo/oceanus-agent"
+Repository = "https://github.com/ilivoo/oceanus-agent.git"
+Documentation = "https://github.com/ilivoo/oceanus-agent/tree/main/docs"
+Changelog = "https://github.com/ilivoo/oceanus-agent/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/ilivoo/oceanus-agent/issues"
 
 [project.optional-dependencies]
 dev = [
@@ -72,6 +78,10 @@ warn_return_any = true
 warn_unused_ignores = true
 disallow_untyped_defs = true
 
+[[tool.mypy.overrides]]
+module = ["pymilvus", "pymilvus.*", "apscheduler", "apscheduler.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
@@ -80,3 +90,32 @@ addopts = "-v --cov=oceanus_agent --cov-report=term-missing"
 [tool.bandit]
 exclude_dirs = ["tests", "scripts"]
 skips = ["B101"]
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+commit_message = "chore(release): v{version} [skip ci]"
+version_source = "tag"
+commit_version_number = true
+major_on_zero = false
+tag_format = "v{version}"
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = ["build", "chore", "ci", "docs", "feat", "fix", "perf", "style", "refactor", "test"]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+
+[tool.semantic_release.branches.main]
+match = "(main|master)"
+prerelease_token = "rc"
+prerelease = false
+
+[tool.semantic_release.changelog]
+exclude_commit_patterns = ["chore\\(release\\):"]
+
+[tool.semantic_release.changelog.environment]
+keep_trailing_newline = true
+
+[tool.semantic_release.remote]
+name = "origin"
+type = "github"
+ignore_token_for_push = false

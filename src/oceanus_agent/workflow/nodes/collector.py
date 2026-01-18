@@ -36,20 +36,20 @@ class JobCollector:
                     **state,
                     "job_info": None,
                     "status": DiagnosisStatus.COMPLETED,
-                    "end_time": datetime.now().isoformat()
+                    "end_time": datetime.now().isoformat(),
                 }
 
             logger.info(
                 "Collected job exception",
                 exception_id=job_info["exception_id"],
                 job_id=job_info["job_id"],
-                error_type=job_info.get("error_type")
+                error_type=job_info.get("error_type"),
             )
 
             return {
                 **state,
                 "job_info": job_info,
-                "status": DiagnosisStatus.IN_PROGRESS
+                "status": DiagnosisStatus.IN_PROGRESS,
             }
 
         except Exception as e:
@@ -59,5 +59,5 @@ class JobCollector:
                 "job_info": None,
                 "status": DiagnosisStatus.FAILED,
                 "error": f"Collection error: {str(e)}",
-                "end_time": datetime.now().isoformat()
+                "end_time": datetime.now().isoformat(),
             }

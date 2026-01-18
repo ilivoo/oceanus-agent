@@ -39,51 +39,48 @@ class ResultStorer:
                 await self.mysql_service.update_diagnosis_result(
                     exception_id=job_info["exception_id"],
                     diagnosis=diagnosis_result,
-                    status="completed"
+                    status="completed",
                 )
 
                 logger.info(
                     "Stored diagnosis result",
                     exception_id=job_info["exception_id"],
                     job_id=job_info["job_id"],
-                    confidence=diagnosis_result["confidence"]
+                    confidence=diagnosis_result["confidence"],
                 )
 
                 return {
                     **state,
                     "status": DiagnosisStatus.COMPLETED,
-                    "end_time": datetime.now().isoformat()
+                    "end_time": datetime.now().isoformat(),
                 }
             else:
                 # Mark as failed
-                error_msg = state.get("error", "Unknown error")
+                error_msg = state.get("error") or "Unknown error"
                 await self.mysql_service.mark_exception_failed(
-                    exception_id=job_info["exception_id"],
-                    error_message=error_msg
+                    exception_id=job_info["exception_id"], error_message=error_msg
                 )
 
                 logger.warning(
                     "Stored failure result",
                     exception_id=job_info["exception_id"],
                     job_id=job_info["job_id"],
-                    error=error_msg
+                    error=error_msg,
                 )
 
                 return {
                     **state,
                     "status": DiagnosisStatus.FAILED,
-                    "end_time": datetime.now().isoformat()
+                    "end_time": datetime.now().isoformat(),
                 }
 
         except Exception as e:
             logger.exception(
-                "Error storing result",
-                job_id=job_info["job_id"],
-                error=str(e)
+                "Error storing result", job_id=job_info["job_id"], error=str(e)
             )
             return {
                 **state,
                 "status": DiagnosisStatus.FAILED,
                 "error": f"Storage error: {str(e)}",
-                "end_time": datetime.now().isoformat()
+                "end_time": datetime.now().isoformat(),
             }

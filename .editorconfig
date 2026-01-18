@@ -1,0 +1,47 @@
+# EditorConfig - 跨 IDE/编辑器的统一代码风格配置
+# https://editorconfig.org
+
+root = true
+
+# 默认配置：适用于所有文件
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Python 文件：与 Ruff/Black 保持一致
+[*.py]
+indent_size = 4
+max_line_length = 88
+
+# YAML/TOML 配置文件
+[*.{yml,yaml,toml}]
+indent_size = 2
+
+# Markdown 文档：允许尾随空格（用于换行）
+[*.md]
+trim_trailing_whitespace = false
+indent_size = 2
+
+# JSON 文件
+[*.json]
+indent_size = 2
+
+# Makefile 必须使用 Tab
+[Makefile]
+indent_style = tab
+
+# Shell 脚本
+[*.sh]
+indent_size = 2
+
+# Dockerfile
+[Dockerfile*]
+indent_size = 4
+
+# SQL 文件
+[*.sql]
+indent_size = 2

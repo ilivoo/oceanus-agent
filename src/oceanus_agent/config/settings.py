@@ -1,6 +1,5 @@
 """Application settings using Pydantic Settings."""
 
-
 from dotenv import load_dotenv
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -10,6 +9,7 @@ load_dotenv()
 
 class MySQLSettings(BaseSettings):
     """MySQL database configuration."""
+
     model_config = SettingsConfigDict(env_prefix="MYSQL_")
 
     host: str = "localhost"
@@ -31,6 +31,7 @@ class MySQLSettings(BaseSettings):
 
 class MilvusSettings(BaseSettings):
     """Milvus vector database configuration."""
+
     model_config = SettingsConfigDict(env_prefix="MILVUS_")
 
     host: str = "localhost"
@@ -57,6 +58,7 @@ class MilvusSettings(BaseSettings):
 
 class OpenAISettings(BaseSettings):
     """OpenAI API configuration."""
+
     model_config = SettingsConfigDict(env_prefix="OPENAI_")
 
     api_key: SecretStr = SecretStr("")
@@ -72,19 +74,20 @@ class OpenAISettings(BaseSettings):
 
 class LangSmithSettings(BaseSettings):
     """LangSmith tracing configuration."""
+
     model_config = SettingsConfigDict(env_prefix="LANGCHAIN_")
 
     tracing_v2: bool = Field(default=True, alias="LANGCHAIN_TRACING_V2")
     api_key: SecretStr = Field(default=SecretStr(""), alias="LANGCHAIN_API_KEY")
     project: str = Field(default="oceanus-agent", alias="LANGCHAIN_PROJECT")
     endpoint: str = Field(
-        default="https://api.smith.langchain.com",
-        alias="LANGCHAIN_ENDPOINT"
+        default="https://api.smith.langchain.com", alias="LANGCHAIN_ENDPOINT"
     )
 
 
 class SchedulerSettings(BaseSettings):
     """Scheduler configuration."""
+
     model_config = SettingsConfigDict(env_prefix="SCHEDULER_")
 
     interval_seconds: int = 60
@@ -93,6 +96,7 @@ class SchedulerSettings(BaseSettings):
 
 class KnowledgeSettings(BaseSettings):
     """Knowledge accumulation configuration."""
+
     model_config = SettingsConfigDict(env_prefix="KNOWLEDGE_")
 
     confidence_threshold: float = 0.8
@@ -102,6 +106,7 @@ class KnowledgeSettings(BaseSettings):
 
 class AppSettings(BaseSettings):
     """Application settings."""
+
     model_config = SettingsConfigDict(env_prefix="APP_")
 
     env: str = "development"
@@ -111,10 +116,9 @@ class AppSettings(BaseSettings):
 
 class Settings(BaseSettings):
     """Global application settings."""
+
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore"
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
     app: AppSettings = Field(default_factory=AppSettings)

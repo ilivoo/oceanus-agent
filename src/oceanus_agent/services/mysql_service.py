@@ -5,8 +5,7 @@ from datetime import datetime
 
 import structlog
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from oceanus_agent.config.settings import MySQLSettings
 from oceanus_agent.models.state import DiagnosisResult, JobInfo
@@ -25,10 +24,8 @@ class MySQLService:
             max_overflow=10,
             pool_pre_ping=True,
         )
-        self.async_session = sessionmaker(
-            self.engine,
-            class_=AsyncSession,
-            expire_on_commit=False
+        self.async_session = async_sessionmaker(
+            self.engine, class_=AsyncSession, expire_on_commit=False
         )
 
     async def get_pending_exception(self) -> JobInfo | None:
@@ -79,14 +76,11 @@ class MySQLService:
                 job_config=job_config,
                 error_message=row[5],
                 error_type=row[6],
-                created_at=str(row[7]) if row[7] else ""
+                created_at=str(row[7]) if row[7] else "",
             )
 
     async def update_diagnosis_result(
-        self,
-        exception_id: int,
-        diagnosis: DiagnosisResult,
-        status: str = "completed"
+        self, exception_id: int, diagnosis: DiagnosisResult, status: str = "completed"
     ) -> None:
         """Update exception with diagnosis result.
 
@@ -105,34 +99,38 @@ class MySQLService:
                 WHERE id = :id
             """)
 
-            suggested_fix = json.dumps({
-                "root_cause": diagnosis["root_cause"],
-                "detailed_analysis": diagnosis["detailed_analysis"],
-                "suggested_fix": diagnosis["suggested_fix"],
-                "priority": diagnosis["priority"],
-                "related_docs": diagnosis["related_docs"]
-            }, ensure_ascii=False)
+            suggested_fix = json.dumps(
+                {
+                    "root_cause": diagnosis["root_cause"],
+                    "detailed_analysis": diagnosis["detailed_analysis"],
+                    "suggested_fix": diagnosis["suggested_fix"],
+                    "priority": diagnosis["priority"],
+                    "related_docs": diagnosis["related_docs"],
+                },
+                ensure_ascii=False,
+            )
 
-            await session.execute(query, {
-                "id": exception_id,
-                "status": status,
-                "suggested_fix": suggested_fix,
-                "confidence": diagnosis["confidence"],
-                "diagnosed_at": datetime.now()
-            })
+            await session.execute(
+                query,
+                {
+                    "id": exception_id,
+                    "status": status,
+                    "suggested_fix": suggested_fix,
+                    "confidence": diagnosis["confidence"],
+                    "diagnosed_at": datetime.now(),
+                },
+            )
             await session.commit()
 
             logger.info(
                 "Updated diagnosis result",
                 exception_id=exception_id,
                 status=status,
-                confidence=diagnosis["confidence"]
+                confidence=diagnosis["confidence"],
             )
 
     async def mark_exception_failed(
-        self,
-        exception_id: int,
-        error_message: str
+        self, exception_id: int, error_message: str
     ) -> None:
         """Mark an exception as failed.
 
@@ -149,20 +147,22 @@ class MySQLService:
                 WHERE id = :id
             """)
 
-            await session.execute(query, {
-                "id": exception_id,
-                "error_message": json.dumps(
-                    {"error": error_message},
-                    ensure_ascii=False
-                ),
-                "diagnosed_at": datetime.now()
-            })
+            await session.execute(
+                query,
+                {
+                    "id": exception_id,
+                    "error_message": json.dumps(
+                        {"error": error_message}, ensure_ascii=False
+                    ),
+                    "diagnosed_at": datetime.now(),
+                },
+            )
             await session.commit()
 
             logger.warning(
                 "Marked exception as failed",
                 exception_id=exception_id,
-                error=error_message
+                error=error_message,
             )
 
     async def insert_knowledge_case(
@@ -173,7 +173,7 @@ class MySQLService:
         root_cause: str,
         solution: str,
         source_exception_id: int | None = None,
-        source_type: str = "auto"
+        source_type: str = "auto",
     ) -> None:
         """Insert a new knowledge case.
 
@@ -196,22 +196,25 @@ class MySQLService:
                  :source_exception_id, :source_type, FALSE)
             """)
 
-            await session.execute(query, {
-                "case_id": case_id,
-                "error_type": error_type,
-                "error_pattern": error_pattern,
-                "root_cause": root_cause,
-                "solution": solution,
-                "source_exception_id": source_exception_id,
-                "source_type": source_type
-            })
+            await session.execute(
+                query,
+                {
+                    "case_id": case_id,
+                    "error_type": error_type,
+                    "error_pattern": error_pattern,
+                    "root_cause": root_cause,
+                    "solution": solution,
+                    "source_exception_id": source_exception_id,
+                    "source_type": source_type,
+                },
+            )
             await session.commit()
 
             logger.info(
                 "Inserted knowledge case",
                 case_id=case_id,
                 error_type=error_type,
-                source_type=source_type
+                source_type=source_type,
             )
 
     async def get_pending_count(self) -> int:

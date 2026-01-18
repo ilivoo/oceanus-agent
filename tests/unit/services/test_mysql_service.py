@@ -4,7 +4,6 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from oceanus_agent.models.state import DiagnosisResult
 from oceanus_agent.services.mysql_service import MySQLService
 
@@ -15,9 +14,7 @@ class TestMySQLService:
     @pytest.fixture
     def mysql_service(self, mysql_settings: MagicMock) -> MySQLService:
         """Create MySQL service with mocked engine."""
-        with patch(
-            "oceanus_agent.services.mysql_service.create_async_engine"
-        ):
+        with patch("oceanus_agent.services.mysql_service.create_async_engine"):
             service = MySQLService(mysql_settings)
             return service
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Initialize Milvus collections with sample data."""
 
-import os
 import sys
 from pathlib import Path
 
@@ -12,7 +11,7 @@ from oceanus_agent.config.settings import settings
 from oceanus_agent.services.milvus_service import MilvusService
 
 
-def main():
+def main() -> None:
     """Initialize Milvus collections."""
     print("Initializing Milvus collections...")
 

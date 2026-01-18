@@ -1,0 +1,31 @@
+# Oceanus Agent Code Owners
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+*                                   @ilivoo
+
+# Workflow core logic
+/src/oceanus_agent/workflow/        @ilivoo
+
+# Services layer (LLM, Milvus, MySQL)
+/src/oceanus_agent/services/        @ilivoo
+
+# API layer
+/src/oceanus_agent/api/             @ilivoo
+
+# Configuration and prompts
+/src/oceanus_agent/config/          @ilivoo
+
+# CI/CD and infrastructure
+/.github/                           @ilivoo
+/deploy/                            @ilivoo
+/Dockerfile                         @ilivoo
+
+# Documentation
+/docs/                              @ilivoo
+/README.md                          @ilivoo
+/CONTRIBUTING.md                    @ilivoo
+
+# Dependencies and config changes require review
+/pyproject.toml                     @ilivoo
+/.pre-commit-config.yaml            @ilivoo

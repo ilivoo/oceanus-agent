@@ -45,15 +45,14 @@ class LLMDiagnoser:
 
             # Generate diagnosis
             diagnosis_result = await self.llm_service.generate_diagnosis(
-                job_info=job_info,
-                context=state.get("retrieved_context")
+                job_info=job_info, context=state.get("retrieved_context")
             )
 
             logger.info(
                 "Generated diagnosis",
                 job_id=job_info["job_id"],
                 confidence=diagnosis_result["confidence"],
-                priority=diagnosis_result["priority"]
+                priority=diagnosis_result["priority"],
             )
 
             return {
@@ -62,7 +61,7 @@ class LLMDiagnoser:
                 "diagnosis_result": diagnosis_result,
                 "status": DiagnosisStatus.IN_PROGRESS,
                 "error": None,
-                "retry_count": 0
+                "retry_count": 0,
             }
 
         except Exception as e:
@@ -71,7 +70,7 @@ class LLMDiagnoser:
                 "Error generating diagnosis",
                 job_id=job_info["job_id"],
                 error=str(e),
-                retry_count=new_retry_count
+                retry_count=new_retry_count,
             )
 
             if new_retry_count >= self.max_retries:
@@ -80,11 +79,7 @@ class LLMDiagnoser:
                     "status": DiagnosisStatus.FAILED,
                     "error": f"Diagnosis failed after {new_retry_count} retries: {str(e)}",
                     "end_time": datetime.now().isoformat(),
-                    "retry_count": new_retry_count
+                    "retry_count": new_retry_count,
                 }
 
-            return {
-                **state,
-                "error": str(e),
-                "retry_count": new_retry_count
-            }
+            return {**state, "error": str(e), "retry_count": new_retry_count}

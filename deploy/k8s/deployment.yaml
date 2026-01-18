@@ -16,7 +16,7 @@ spec:
         app: oceanus-agent
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
+        prometheus.io/port: "8000"
         prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: oceanus-agent
@@ -36,22 +36,21 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "500m"
+          ports:
+            - containerPort: 8000
+              name: http
           livenessProbe:
-            exec:
-              command:
-                - python
-                - -c
-                - "print('healthy')"
+            httpGet:
+              path: /api/v1/health
+              port: 8000
             initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
-            exec:
-              command:
-                - python
-                - -c
-                - "print('ready')"
+            httpGet:
+              path: /api/v1/ready
+              port: 8000
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 3
