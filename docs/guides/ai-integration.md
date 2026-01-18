@@ -2,7 +2,7 @@
 
 > 本文档记录了 oceanus-agent 项目的 AI 编程工具链与 GitHub 集成现状，供开发者参考。
 >
-> 最后更新：2026-01-14
+> 最后更新：2026-01-18
 
 ## 总体评估
 
@@ -154,7 +154,7 @@
 | GitHub Projects | 可视化项目管理看板 | 中 |
 | Discussions | 开放社区讨论 | 低 |
 | Wiki | 项目 Wiki 文档 | 低（已有 docs/） |
-| GitHub Copilot 配置 | `.github/copilot-instructions.md` | 中 |
+| ~~GitHub Copilot 配置~~ | ~~`.github/copilot-instructions.md`~~ | ✅ 已完成 |
 
 ---
 
@@ -165,12 +165,12 @@
 | CI/CD 自动化 | 10 | 10 |
 | 代码质量工具 | 10 | 10 |
 | AI 助手配置 | 10 | 10 |
-| 代码审查自动化 | 9 | 10 |
+| 代码审查自动化 | 10 | 10 |
 | Issue/PR 管理 | 9 | 10 |
 | 依赖安全管理 | 10 | 10 |
 | 文档体系 | 10 | 10 |
 | AI Agent 自动化 | 5 | 10 |
-| **总分** | **83** | **90** |
+| **总分** | **84** | **90** |
 
 ---
 
@@ -182,15 +182,13 @@
    - ~~配置 Branch Protection Rules~~ ✅ 已完成，参见 [配置指南](./branch-protection.md)
    - 验证 Secrets（`CODECOV_TOKEN` 等）
 
-2. **添加 GitHub Copilot 配置**（可选）
-   ```bash
-   # 创建 Copilot 指令文件
-   touch .github/copilot-instructions.md
-   ```
+2. ~~**添加 GitHub Copilot 配置**~~ ✅ 已完成
+   - 配置文件：`.github/copilot-instructions.md`
+   - 包含：项目概览、技术栈、代码风格、命名规范、常用模式等
 
 ### 优先级中
 
-3. **启用 GitHub Environments**
+3. **启用 GitHub Environments** - [配置指南](#github-environments-配置指南)
    - 配置 `staging` 和 `production` 环境
    - 添加环境保护规则（需审批才能部署）
 
@@ -209,7 +207,117 @@
 
 项目在 AI 编程集成方面已经做得非常完善，几乎覆盖了专业级开发团队的所有最佳实践。主要的改进空间在于：
 
-1. **GitHub 仓库级别的设置**（Branch Protection、Secrets）
+1. **GitHub 仓库级别的设置**（Environments、Secrets 验证）
 2. **进阶的 AI Agent 自动化**（自动处理 Issue、生成 PR）
 
 当前的配置已经足以支撑高效的 AI 辅助开发流程！
+
+---
+
+## 附录
+
+### GitHub Environments 配置指南
+
+GitHub Environments 允许你为不同的部署目标（如 staging、production）配置保护规则和密钥。
+
+#### 配置步骤
+
+1. **进入仓库设置**
+   - 打开 GitHub 仓库页面
+   - 点击 **Settings** → **Environments**
+
+2. **创建 Staging 环境**
+   ```
+   名称: staging
+   保护规则:
+   - ✅ Required reviewers: 0（可选，staging 通常不需要审批）
+   - ✅ Wait timer: 0 分钟
+   ```
+
+3. **创建 Production 环境**
+   ```
+   名称: production
+   保护规则:
+   - ✅ Required reviewers: 1（至少 1 人审批）
+   - ✅ Wait timer: 5 分钟（可选，给予取消时间）
+   - ✅ Deployment branches: 仅限 main 分支
+   ```
+
+4. **配置环境密钥**（可选）
+   每个环境可以有独立的 Secrets：
+   ```
+   staging:
+   - KUBECONFIG_STAGING
+   - API_ENDPOINT_STAGING
+
+   production:
+   - KUBECONFIG_PRODUCTION
+   - API_ENDPOINT_PRODUCTION
+   ```
+
+#### 在 Workflow 中使用
+
+```yaml
+# .github/workflows/deploy.yml
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment: staging  # 使用 staging 环境
+    steps:
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying to staging..."
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment: production  # 使用 production 环境（需审批）
+    needs: deploy-staging
+    steps:
+      - name: Deploy to Production
+        run: |
+          echo "Deploying to production..."
+```
+
+#### 推荐的环境配置
+
+| 环境 | 审批要求 | 分支限制 | 等待时间 |
+|------|----------|----------|----------|
+| `staging` | 无 | 无 | 0 分钟 |
+| `production` | 1 人 | 仅 `main` | 5 分钟 |
+
+---
+
+### Secrets 配置检查清单
+
+以下是项目可能需要的 GitHub Secrets：
+
+| Secret 名称 | 用途 | 必需 | 配置位置 |
+|-------------|------|------|----------|
+| `CODECOV_TOKEN` | 代码覆盖率上报 | 推荐 | Repository secrets |
+| `DOCKER_USERNAME` | Docker Hub 登录 | 是 | Repository secrets |
+| `DOCKER_PASSWORD` | Docker Hub 密码 | 是 | Repository secrets |
+| `OPENAI_API_KEY` | LLM API 调用（仅测试） | 可选 | Repository secrets |
+| `KUBECONFIG` | K8s 部署配置 | 部署时需要 | Environment secrets |
+
+#### 配置步骤
+
+1. **进入仓库设置**
+   - 打开 GitHub 仓库页面
+   - 点击 **Settings** → **Secrets and variables** → **Actions**
+
+2. **添加 Repository secrets**
+   - 点击 **New repository secret**
+   - 输入名称和值
+
+3. **验证 Secrets 是否生效**
+   ```yaml
+   # 在 workflow 中检查 secret 是否存在
+   - name: Check secrets
+     run: |
+       if [ -z "${{ secrets.CODECOV_TOKEN }}" ]; then
+         echo "Warning: CODECOV_TOKEN not configured"
+       fi
+   ```
+
+> [!CAUTION]
+> 永远不要在日志中打印 Secret 的实际值！
