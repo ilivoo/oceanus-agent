@@ -45,6 +45,16 @@
 - 节点重试失败
 - 无限循环
 
-## 关联知识
+## 关联知识库
 
-- 故障排除: .claude/knowledge/troubleshooting.md
+| 知识库 | 用途 |
+|--------|------|
+| [troubleshooting.md](../knowledge/troubleshooting.md) | 常见问题和解决方案 |
+| [architecture.md](../knowledge/architecture.md) | 系统依赖关系排查 |
+| [patterns.md](../knowledge/patterns.md) | 正确的代码模式参考 |
+
+## 相关文档
+
+- [命令总览](README.md)
+- [开发指南 - 常见问题](../../docs/guides/development.md)
+- [端到端示例](../../docs/guides/workflow-example.md)

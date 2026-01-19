@@ -66,8 +66,17 @@
 - [ ] 建议的分支名：`feat/xxx` 或 `fix/xxx`
 ```
 
-## 关联知识
+## 关联知识库
 
-- 项目架构: .claude/knowledge/architecture.md
-- 代码模式: .claude/knowledge/patterns.md
-- 现有设计: docs/design/
+| 知识库 | 用途 |
+|--------|------|
+| [architecture.md](../knowledge/architecture.md) | 系统架构，评估影响范围 |
+| [patterns.md](../knowledge/patterns.md) | 代码模式，技术方案参考 |
+| [conventions.md](../knowledge/conventions.md) | 分支命名、Commit 规范 |
+
+## 相关文档
+
+- [命令总览](README.md)
+- [AI Code 研发流程](../../docs/guides/ai-code-workflow.md)
+- [现有设计文档](../../docs/design/)
+- [端到端示例](../../docs/guides/workflow-example.md)

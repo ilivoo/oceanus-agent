@@ -217,13 +217,15 @@ gh pr merge --squash
 
 ### 常用命令
 
-| 命令 | 用途 |
-|------|------|
-| `/analyze-issue` | 分析需求 |
-| `/design` | 生成设计文档 |
-| `/test` | 生成测试骨架 (TDD) |
-| `/review` | 代码审查 |
-| `/diagnose` | 问题诊断 |
+| 命令 | 用途 | 详细文档 |
+|------|------|----------|
+| `/analyze-issue` | 分析需求 | [命令说明](../../.claude/commands/analyze-issue.md) |
+| `/design` | 生成设计文档 | [命令说明](../../.claude/commands/design.md) |
+| `/test` | 生成测试骨架 (TDD) | [命令说明](../../.claude/commands/test.md) |
+| `/review` | 代码审查 | [命令说明](../../.claude/commands/review.md) |
+| `/diagnose` | 问题诊断 | [命令说明](../../.claude/commands/diagnose.md) |
+
+> 命令完整索引和流程图请参考 [命令总览](../../.claude/commands/README.md)
 
 ### 分支命名
 
@@ -281,3 +283,13 @@ docs(api): update endpoint documentation
 - [ ] 合并 PR
 - [ ] 确认 Release 成功
 - [ ] 验证部署（如适用）
+
+---
+
+## 相关文档
+
+- [命令总览](../../.claude/commands/README.md) - 所有命令的详细说明和流程图
+- [知识库说明](../../.claude/knowledge/README.md) - 项目知识库索引
+- [TDD 开发指南](tdd.md) - 测试驱动开发详细指南
+- [端到端示例](workflow-example.md) - 完整开发流程示例
+- [分支保护规则](branch-protection.md) - GitHub 分支保护配置
