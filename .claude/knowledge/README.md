@@ -104,7 +104,7 @@
 
 知识库的重大更新应在 PR 描述或 Commit Message 中标注：
 
-```
+```text
 docs(knowledge): update architecture.md with new retriever pattern
 ```
 

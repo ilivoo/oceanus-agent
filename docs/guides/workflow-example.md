@@ -78,7 +78,8 @@ git checkout -b feat/kafka-consumer
 **输出文件**: `docs/design/kafka-consumer.md`
 
 **设计文档示例**:
-```markdown
+
+````markdown
 # Kafka 消费者服务设计文档
 
 ## 1. 概述
@@ -87,7 +88,8 @@ git checkout -b feat/kafka-consumer
 ## 2. 架构设计
 
 ### 2.1 组件位置
-```
+
+```text
 src/oceanus_agent/
 ├── services/
 │   └── kafka_service.py    # 新增
@@ -98,7 +100,8 @@ src/oceanus_agent/
 ```
 
 ### 2.2 类图
-```
+
+```text
 ┌─────────────────────────────────┐
 │         KafkaService            │
 ├─────────────────────────────────┤
@@ -140,7 +143,7 @@ class KafkaService:
         """消费消息并返回解析后的异常对象."""
 
     async def health_check(self) -> bool:
-        """检查 Kafka 连接健康状态."""
+        """检查 Kafka 连接健康状态."
 ```
 
 ## 5. 测试策略
@@ -155,7 +158,7 @@ class KafkaService:
 | settings.py | 新增配置 | KafkaSettings |
 | health.py | 新增端点 | /health/kafka |
 | 依赖 | 新增库 | aiokafka |
-```
+````
 
 ---
 
@@ -285,7 +288,8 @@ pytest tests/unit/services/test_kafka_service.py -v
 ```
 
 **预期输出**:
-```
+
+```text
 FAILED tests/unit/services/test_kafka_service.py::TestKafkaService::test_connect_when_not_connected_starts_consumer
   ModuleNotFoundError: No module named 'oceanus_agent.services.kafka_service'
 ```
@@ -384,7 +388,8 @@ pytest tests/unit/services/test_kafka_service.py -v
 ```
 
 **预期输出**:
-```
+
+```text
 tests/unit/services/test_kafka_service.py::TestKafkaService::test_connect_when_not_connected_starts_consumer PASSED
 tests/unit/services/test_kafka_service.py::TestKafkaService::test_disconnect_when_connected_stops_consumer PASSED
 tests/unit/services/test_kafka_service.py::TestKafkaService::test_consume_with_valid_message_returns_job_exception PASSED
@@ -591,7 +596,8 @@ Fixes #123"
 ### 场景
 
 CI 检查失败，错误信息：
-```
+
+```text
 FAILED tests/unit/workflow/test_nodes.py::test_diagnose_node
 TypeError: unsupported operand type(s) for +: 'NoneType' and 'str'
 ```
@@ -603,7 +609,8 @@ TypeError: unsupported operand type(s) for +: 'NoneType' and 'str'
 ```
 
 **输出**:
-```markdown
+
+````markdown
 ## 诊断报告
 
 ### 根因分析
@@ -612,6 +619,7 @@ TypeError: unsupported operand type(s) for +: 'NoneType' and 'str'
 - 触发条件: 当 retriever 节点未返回任何结果时
 
 ### 修复建议
+
 ```python
 # 修改前
 prompt = state.context + state.error_message
@@ -624,7 +632,7 @@ prompt = context + state.error_message
 ### 预防措施
 - 添加空值检查测试用例
 - 考虑使用 Optional 类型提示
-```
+````
 
 ---
 

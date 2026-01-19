@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: quality
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -111,7 +111,15 @@ jobs:
       - name: Verify test naming convention
         run: |
           # 检查测试文件命名是否符合规范
-          BAD_NAMES=$(find tests -name "*.py" -type f | grep -v "test_" | grep -v "conftest" | grep -v "__init__" || true)
+          # 排除 conftest.py, __init__.py, 以及常见的辅助模块
+          BAD_NAMES=$(find tests -name "*.py" -type f \
+            ! -name "test_*.py" \
+            ! -name "conftest.py" \
+            ! -name "__init__.py" \
+            ! -name "fixtures.py" \
+            ! -name "utils.py" \
+            ! -name "helpers.py" \
+            || true)
           if [ -n "$BAD_NAMES" ]; then
             echo "::warning::Found test files not following naming convention:"
             echo "$BAD_NAMES"

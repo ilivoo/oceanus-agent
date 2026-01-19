@@ -14,7 +14,7 @@
 
 ## 标准开发流程
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                        标准开发流程                              │
 ├─────────────────────────────────────────────────────────────────┤
@@ -83,6 +83,7 @@
 - 下一步建议（是否需要设计文档、ADR、分支名）
 
 **复杂度判定**:
+
 | 复杂度 | 代码行数 | 后续动作 |
 |--------|----------|----------|
 | 低 | < 50 行 | 直接 → `/test` |
@@ -129,7 +130,8 @@
 - 功能描述: `添加 Kafka 消费者健康检查`
 
 **TDD 工作流**:
-```
+
+```text
 1. /test [功能]          → 生成测试骨架
 2. 完善测试用例           → 编写断言
 3. pytest tests/...      → Red (失败)
@@ -189,8 +191,8 @@
 
 | CI 检查 | 对应命令 | 修复操作 |
 |---------|----------|----------|
-| `Code Quality (pre-commit)` | `/review` | `ruff format && ruff check --fix` |
-| `Unit Tests` | `/test` | 修复测试用例 |
+| `Code Quality (pre-commit)` | `/review` | `.venv/bin/ruff format && .venv/bin/ruff check --fix` |
+| `Unit Tests` | `/test` | `.venv/bin/pytest` 修复测试用例 |
 | `Security Scan` | `/diagnose` | 修复安全问题 |
 | `Build Docker Image` | `/diagnose` | 检查 Dockerfile |
 
