@@ -1,0 +1,57 @@
+# Codecov Configuration
+# https://docs.codecov.com/docs/codecovyml-reference
+
+coverage:
+  # 覆盖率精度
+  precision: 2
+  round: down
+
+  # 覆盖率阈值配置
+  status:
+    project:
+      default:
+        # 项目整体覆盖率目标
+        target: 70%
+        # 允许覆盖率下降的阈值
+        threshold: 1%
+        # 仅对修改的文件进行检查
+        only_changed_files: false
+
+    patch:
+      default:
+        # 新增/修改代码的覆盖率目标
+        target: 80%
+        # 允许的阈值偏差
+        threshold: 5%
+
+# PR 评论配置
+comment:
+  # 评论布局: header, diff, flags, files, footer
+  layout: "header, diff, flags, files, footer"
+  # 评论行为: default, once, new, spammy
+  behavior: default
+  # 是否需要变更才显示评论
+  require_changes: true
+  # 是否需要 base 报告才显示评论
+  require_base: false
+  # 是否需要 head 报告才显示评论
+  require_head: true
+
+# 忽略的路径
+ignore:
+  - "tests/**/*"
+  - "scripts/**/*"
+  - "docs/**/*"
+  - "**/__init__.py"
+  - "**/conftest.py"
+
+# 标志配置 (用于区分不同类型的测试)
+flags:
+  unittests:
+    paths:
+      - src/oceanus_agent/
+    carryforward: true
+
+# GitHub 检查配置
+github_checks:
+  annotations: true
