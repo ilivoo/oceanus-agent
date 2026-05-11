@@ -14,7 +14,7 @@ black>=24.3.0
 isort>=5.13.0
 
 # Type Stubs
-types-pymysql>=1.1.0
+types-pymysql>=1.1.0.20260508
 
 # Development Tools
 ipython>=8.23.0
