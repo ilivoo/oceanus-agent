@@ -14,7 +14,7 @@ pymilvus>=2.4.0
 # Relational Database
 sqlalchemy[asyncio]>=2.0.0
 aiomysql>=0.2.0
-pymysql>=1.1.0
+pymysql>=1.2.0
 
 # Web Framework (optional API)
 fastapi>=0.110.0
