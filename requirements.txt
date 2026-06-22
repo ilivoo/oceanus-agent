@@ -6,7 +6,7 @@ langsmith>=0.1.0
 
 # LLM & Embedding
 openai>=1.50.0
-tiktoken>=0.7.0
+tiktoken>=0.13.0
 
 # Vector Database
 pymilvus>=2.4.0
